@@ -1,0 +1,199 @@
+--[[
+  TODO: documentation
+]]
+
+env = {}
+env.trace = true
+env.test = {}
+env.test.in_dev = true
+env.test.debug = true
+
+GD = {}
+GD.game = {}
+
+GD.cities = {
+  { id = 1, pos = {x = -7.688, y = 1, z = 13.657}, closed = false,
+    tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
+    neighbors = { {id = 2, bridge = 1}, {id = 4, bridge = 5}, {id = 6, bridge = 4}, {id = 9, bridge = 3}, },
+  },
+  { id = 2, pos = {x = 1.729, y = 1, z = 13.894}, closed = false,
+  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
+    neighbors = { {id = 1, bridge = 1}, {id = 3, bridge = 2}, {id = 5, bridge = 7}, },
+  },
+  { id = 3, pos = {x = 9.044, y = 1, z = 12.992}, closed = false,
+  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
+    neighbors = { {id = 2, bridge = 2}, {id = 5, bridge = 8}, {id = 8, bridge = 9}, },
+  },
+  { id = 4, pos = {x = -1.072, y = 1, z = 8.904}, closed = false,
+  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
+    neighbors = { {id = 1, bridge = 5}, {id = 5, bridge = 6}, {id = 10, bridge = 11}, {id = 6, bridge = 10}, },
+  },
+  { id = 5, pos = {x = 5.428, y = 1, z = 9.483}, closed = false,
+  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
+    neighbors = { {id = 2, bridge = 7}, {id = 3, bridge = 8}, {id = 7, bridge = 23}, {id = 4, bridge = 6}, },
+  },
+  { id = 6, pos = {x = -5.872, y = 1, z = 5.429}, closed = false,
+  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
+    neighbors = { {id = 1, bridge = 4}, {id = 4, bridge = 10}, {id = 12, bridge = 14}, {id = 9, bridge = 13}, },
+  },
+  { id = 7, pos = {x = 4.814, y = 1, z = 4.692}, closed = false,
+  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
+    neighbors = { {id = 5, bridge = 23}, {id = 8, bridge = 12}, {id = 11, bridge = 16}, {id = 10, bridge = 15}, },
+  },
+  { id = 8, pos = {x = 9.955, y = 1, z = 4.366}, closed = false,
+  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
+    neighbors = { {id = 7, bridge = 12}, {id = 3, bridge = 9}, {id = 11, bridge = 17}, },
+  },
+  { id = 9, pos = {x = -7.684, y = 1, z = -1.60}, closed = false,
+  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
+    neighbors = { {id = 1, bridge = 3}, {id = 6, bridge = 13}, {id = 12, bridge = 20}, },
+  },
+  { id = 10, pos = {x = -0.174, y = 1, z = 1.196}, closed = false,
+  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
+    neighbors = { {id = 4, bridge = 11}, {id = 7, bridge = 15}, {id = 13, bridge = 19}, {id = 12, bridge = 18}, },
+  },
+  { id = 11, pos = {x = 8.348, y = 1, z = -0.147}, closed = false,
+  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
+    neighbors = { {id = 7, bridge = 16}, {id = 8, bridge = 17}, {id = 13, bridge = 22}, },
+  },
+  { id = 12, pos = {x = -2.118, y = 1, z = -4.982}, closed = false,
+  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
+    neighbors = { {id = 9, bridge = 20}, {id = 6, bridge = 14}, {id = 10, bridge = 18}, {id = 13, bridge = 21}, },
+  },
+  { id = 13, pos = {x = 5.431, y = 1, z = -4.644}, closed = false,
+  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
+    neighbors = { {id = 12, bridge = 21}, {id = 10, bridge = 19}, {id = 11, bridge = 22}, },
+  },
+}
+
+GD.bridges = {
+  { id = 1, intact = true, cities = {1,2}, },
+  { id = 2, intact = true, cities = {2,3}, },
+  { id = 3, intact = true, cities = {1,9}, },
+  { id = 4, intact = true, cities = {1,6}, },
+  { id = 5, intact = true, cities = {1,5}, },
+  { id = 6, intact = true, cities = {4,5}, },
+  { id = 7, intact = true, cities = {2,5}, },
+  { id = 8, intact = true, cities = {3,5}, },
+  { id = 9, intact = true, cities = {3,8}, },
+  { id = 10, intact = true, cities = {4,6}, },
+  { id = 11, intact = true, cities = {4,10}, },
+  { id = 12, intact = true, cities = {7,8}, },
+  { id = 13, intact = true, cities = {6,9}, },
+  { id = 14, intact = true, cities = {6,12}, },
+  { id = 15, intact = true, cities = {7,10}, },
+  { id = 16, intact = true, cities = {7,11}, },
+  { id = 17, intact = true, cities = {8,11}, },
+  { id = 18, intact = true, cities = {10.12}, },
+  { id = 19, intact = true, cities = {10,13}, },
+  { id = 20, intact = true, cities = {9,12}, },
+  { id = 21, intact = true, cities = {12,13}, },
+  { id = 22, intact = true, cities = {11,13}, },
+  { id = 23, intact = true, cities = {5,7}, },
+}
+
+--[[ Load function ]]
+function onLoad(save_state)
+	if env.trace then log("onLoad()") end
+
+
+end
+
+--[[ Save function ]]
+function onSave()
+end
+
+--[[ Set snap back pos for any object picked up. ]]
+g_snap_back_pos = {}
+function onObjectPickUp(pcol, obj)
+  -- g_snap_back_pos[pcol] = obj.getPosition()
+  g_snap_back_pos[obj.getGUID()] = obj.getPosition()
+end
+
+--[[ Locate city ID in the network by dropped tile position.  Returns -1 if not found. ]]
+function findCityID(pos)
+  for _,city in ipairs(GD.cities) do
+    local x = city.pos.x
+    local z = city.pos.z
+    if pos.x > x-3 and pos.x < x+3 and pos.z > z-3 and pos.z < z+3 then
+      return city.id
+    end
+  end
+  return -1
+end
+
+--[[ Handle dropping a tile in a city and update network info. ]]
+function onObjectDrop(pcol, obj)
+  if env.test.debug then log("player "..pcol.." dropped "..obj.getGUID()) end
+  if obj.tag ~= "Tile" then return end  --ignore non-tile objects
+  local city_id = findCityID(obj.getPosition())
+  if city_id < 0 then
+    if env.test.debug then log("Player "..pcol.." dropped "..obj.getName().." outside a city") end
+    obj.setVelocity(Vector(0,0,0))
+    if g_snap_back_pos[obj.getGUID()] ~= nil then obj.setPosition(g_snap_back_pos[obj.getGUID()]) end
+    g_snap_back_pos[obj.getGUID()] = nil
+    return
+  end
+  --check for existing master color match and student counts
+  for tag,tile in pairs(GD.cities[city_id].tiles) do
+    if obj.hasTag(tag) then
+      if tile.n > 0 then
+        if obj.getGMNotes() ~= tile.c then
+          if env.test.debug then log("another player already played a "..obj.getName().." here") end
+          obj.setVelocity(Vector(0,0,0))
+          if g_snap_back_pos[obj.getGUID()] ~= nil then obj.setPosition(g_snap_back_pos[obj.getGUID()]) end
+          g_snap_back_pos[obj.getGUID()] = nil
+          return
+        elseif tile.n >= 2 then
+          if env.test.debug then log("already a "..obj.getName().." student here, cannot play another") end
+          obj.setVelocity(Vector(0,0,0))
+          if g_snap_back_pos[obj.getGUID()] ~= nil then obj.setPosition(g_snap_back_pos[obj.getGUID()]) end
+          g_snap_back_pos[obj.getGUID()] = nil
+          return
+        else
+          if env.test.debug then log("valid student for "..obj.getName()) end
+          tile.n = tile.n + 1
+          break
+        end
+      else
+        if env.test.debug then log("new master tile for "..obj.getName()) end
+        tile.c = obj.getGMNotes()
+        tile.n = tile.n + 1
+        break
+      end
+    end
+  end
+  --Locate tile in appropriate spot in city
+  local cpos = GD.cities[city_id].pos
+  local dx, dz
+  if obj.hasTag("Rain") then
+    dx = -0.5
+    dz = 1
+  elseif obj.hasTag("Astro") then
+    dx = 0.5
+    dz = 1
+  elseif obj.hasTag("Dragon") then
+    dx = -1
+    dz = 0
+  elseif obj.hasTag("Priest") then
+    dx = 0
+    dz = 0
+  elseif obj.hasTag("Yeti") then
+    dx = 1
+    dz = 0
+  elseif obj.hasTag("Fire") then
+    dx = -0.5
+    dz = -1
+  elseif obj.hasTag("Healer") then
+    dx = 0.5
+    dz = -1
+  else
+    log("ERROR: Tile "..obj.getGUID().." has no matching tag")
+    return
+  end
+  obj.setPosition(Vector(cpos.x + dx, 2, cpos.z + dz))
+end
+
+
+require("tts-bosl/Constants")
+require("tts-lib/utils")
