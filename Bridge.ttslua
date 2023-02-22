@@ -1,0 +1,8 @@
+function onLoad()
+  env = Global.getTable("env")
+  --if env.test.debug then log("Loaded block "..self.getGUID()) end
+end
+
+function arrowClick(player, btn, id)
+  Global.call("studentJourney", {guid=self.getGUID(), pcol=player.color, id=id})
+end

@@ -1,0 +1,30 @@
+<Defaults>
+  <Row  dontUseTableRowBackground="true" />
+  <Cell dontUseTableCellBackground="true" />
+  <Image color="rgb(1,1,0)" raycastTarget="true"  onClick="arrowClick" />
+</Defaults>
+
+<Panel id="mainPanel" active="false"
+       color="rgba(0,0,0,0)" width="200" height="200" rotation="0 0 0" position="0 0 0">
+  <TableLayout>
+    <Row prefferredHeight="80">
+      <Cell>
+        <Panel id="upPanel">
+          <Image id="upArrow" image="Sprites/Icons/Arrow_Up" />
+        </Panel>
+      </Cell>
+    </Row>
+    <Row prefferredHeight="40">
+      <Cell>
+        <Panel color="rgba(0,0,0,0)"/>
+      </Cell>
+    </Row>
+    <Row prefferredHeight="80">
+      <Cell>
+        <Panel id="downPanel">
+          <Image id="downArrow" image="Sprites/Icons/Arrow_Down" />
+        </Panel>
+      </Cell>
+    </Row>
+  </TableLayout>
+</Panel>

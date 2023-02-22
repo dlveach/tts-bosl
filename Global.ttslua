@@ -7,193 +7,308 @@ env.trace = true
 env.test = {}
 env.test.in_dev = true
 env.test.debug = true
+env.test.trace = true
 
 GD = {}
 GD.game = {}
-
-GD.cities = {
-  { id = 1, pos = {x = -7.688, y = 1, z = 13.657}, closed = false,
-    tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
-    neighbors = { {id = 2, bridge = 1}, {id = 4, bridge = 5}, {id = 6, bridge = 4}, {id = 9, bridge = 3}, },
-  },
-  { id = 2, pos = {x = 1.729, y = 1, z = 13.894}, closed = false,
-  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
-    neighbors = { {id = 1, bridge = 1}, {id = 3, bridge = 2}, {id = 5, bridge = 7}, },
-  },
-  { id = 3, pos = {x = 9.044, y = 1, z = 12.992}, closed = false,
-  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
-    neighbors = { {id = 2, bridge = 2}, {id = 5, bridge = 8}, {id = 8, bridge = 9}, },
-  },
-  { id = 4, pos = {x = -1.072, y = 1, z = 8.904}, closed = false,
-  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
-    neighbors = { {id = 1, bridge = 5}, {id = 5, bridge = 6}, {id = 10, bridge = 11}, {id = 6, bridge = 10}, },
-  },
-  { id = 5, pos = {x = 5.428, y = 1, z = 9.483}, closed = false,
-  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
-    neighbors = { {id = 2, bridge = 7}, {id = 3, bridge = 8}, {id = 7, bridge = 23}, {id = 4, bridge = 6}, },
-  },
-  { id = 6, pos = {x = -5.872, y = 1, z = 5.429}, closed = false,
-  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
-    neighbors = { {id = 1, bridge = 4}, {id = 4, bridge = 10}, {id = 12, bridge = 14}, {id = 9, bridge = 13}, },
-  },
-  { id = 7, pos = {x = 4.814, y = 1, z = 4.692}, closed = false,
-  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
-    neighbors = { {id = 5, bridge = 23}, {id = 8, bridge = 12}, {id = 11, bridge = 16}, {id = 10, bridge = 15}, },
-  },
-  { id = 8, pos = {x = 9.955, y = 1, z = 4.366}, closed = false,
-  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
-    neighbors = { {id = 7, bridge = 12}, {id = 3, bridge = 9}, {id = 11, bridge = 17}, },
-  },
-  { id = 9, pos = {x = -7.684, y = 1, z = -1.60}, closed = false,
-  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
-    neighbors = { {id = 1, bridge = 3}, {id = 6, bridge = 13}, {id = 12, bridge = 20}, },
-  },
-  { id = 10, pos = {x = -0.174, y = 1, z = 1.196}, closed = false,
-  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
-    neighbors = { {id = 4, bridge = 11}, {id = 7, bridge = 15}, {id = 13, bridge = 19}, {id = 12, bridge = 18}, },
-  },
-  { id = 11, pos = {x = 8.348, y = 1, z = -0.147}, closed = false,
-  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
-    neighbors = { {id = 7, bridge = 16}, {id = 8, bridge = 17}, {id = 13, bridge = 22}, },
-  },
-  { id = 12, pos = {x = -2.118, y = 1, z = -4.982}, closed = false,
-  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
-    neighbors = { {id = 9, bridge = 20}, {id = 6, bridge = 14}, {id = 10, bridge = 18}, {id = 13, bridge = 21}, },
-  },
-  { id = 13, pos = {x = 5.431, y = 1, z = -4.644}, closed = false,
-  tiles = {Rain = {c="", n=0}, Astro = {c="", n=0}, Dragon = {c="", n=0}, Priest = {c="", n=0}, Yeti = {c="", n=0}, Fire = {c="", n=0}, Healer = {c="", n=0}, },
-    neighbors = { {id = 12, bridge = 21}, {id = 10, bridge = 19}, {id = 11, bridge = 22}, },
-  },
-}
-
-GD.bridges = {
-  { id = 1, intact = true, cities = {1,2}, },
-  { id = 2, intact = true, cities = {2,3}, },
-  { id = 3, intact = true, cities = {1,9}, },
-  { id = 4, intact = true, cities = {1,6}, },
-  { id = 5, intact = true, cities = {1,5}, },
-  { id = 6, intact = true, cities = {4,5}, },
-  { id = 7, intact = true, cities = {2,5}, },
-  { id = 8, intact = true, cities = {3,5}, },
-  { id = 9, intact = true, cities = {3,8}, },
-  { id = 10, intact = true, cities = {4,6}, },
-  { id = 11, intact = true, cities = {4,10}, },
-  { id = 12, intact = true, cities = {7,8}, },
-  { id = 13, intact = true, cities = {6,9}, },
-  { id = 14, intact = true, cities = {6,12}, },
-  { id = 15, intact = true, cities = {7,10}, },
-  { id = 16, intact = true, cities = {7,11}, },
-  { id = 17, intact = true, cities = {8,11}, },
-  { id = 18, intact = true, cities = {10.12}, },
-  { id = 19, intact = true, cities = {10,13}, },
-  { id = 20, intact = true, cities = {9,12}, },
-  { id = 21, intact = true, cities = {12,13}, },
-  { id = 22, intact = true, cities = {11,13}, },
-  { id = 23, intact = true, cities = {5,7}, },
-}
 
 --[[ Load function ]]
 function onLoad(save_state)
 	if env.trace then log("onLoad()") end
 
+  --TODO: check for reload saved state
+
+	GD.bridges = {}
+	for _,bridge in ipairs(C.bridges) do
+		GD.bridges[bridge.guid]=bridge
+	end
+  GD.cities = simpleDeepCopy(C.cities)
+	local board = getObjectFromGUID(C.board_guid)
+	if not(env.test.in_dev) then
+		board.interactable = false
+	end
+	GD.current_player = math.random(1,4)
+	local current = C.player_colors[GD.current_player]
+  if env.test.debug then log("Current player is "..current) end
+	for _,pcol in ipairs(C.player_colors) do
+		board.UI.setAttribute(pcol.."PlayerPanel","active",pcol == current)
+		board.UI.setAttribute(pcol.."UndoPanel","active","false")
+	end
+  GD.undo = {}
+	GD.played_tiles = 0
+	GD.stage = "play" --TODO: change to "setup" when implemented
 
 end
 
 --[[ Save function ]]
 function onSave()
+  --TODO: Save state
 end
 
---[[ Set snap back pos for any object picked up. ]]
-g_snap_back_pos = {}
-function onObjectPickUp(pcol, obj)
-  -- g_snap_back_pos[pcol] = obj.getPosition()
-  g_snap_back_pos[obj.getGUID()] = obj.getPosition()
-end
-
---[[ Locate city ID in the network by dropped tile position.  Returns -1 if not found. ]]
-function findCityID(pos)
+--[[ Locate ID in the network of nearest city to dropped tile position.  Returns -1 if not found. ]]
+function findNearestCity(pos)
+  assert(pos, "ERROR: findNearestCity(): missing parameter 'pos'")
+  if env.test.trace then log("findNearestCity()") end
+  local nearest = nil
+  local shortest_dist = nil
   for _,city in ipairs(GD.cities) do
-    local x = city.pos.x
-    local z = city.pos.z
-    if pos.x > x-3 and pos.x < x+3 and pos.z > z-3 and pos.z < z+3 then
-      return city.id
+    local dist = Vector.sqrDistance(pos, Vector(city.pos))
+    if nearest == nil or dist < shortest_dist then
+      shortest_dist = dist
+      nearest = city
     end
   end
-  return -1
+  if env.test.debug then
+    log("Closest city is "..tostring(nearest.id))
+    log("Distance is "..tostring(shortest_dist))
+    log(nearest)
+  end
+  if nearest then
+    return nearest.id
+  else
+    if env.test.debug then log("ERROR: findNearestCity(): failed to locate a city.") end
+    return -1
+  end
 end
 
 --[[ Handle dropping a tile in a city and update network info. ]]
 function onObjectDrop(pcol, obj)
-  if env.test.debug then log("player "..pcol.." dropped "..obj.getGUID()) end
-  if obj.tag ~= "Tile" then return end  --ignore non-tile objects
-  local city_id = findCityID(obj.getPosition())
-  if city_id < 0 then
-    if env.test.debug then log("Player "..pcol.." dropped "..obj.getName().." outside a city") end
-    obj.setVelocity(Vector(0,0,0))
-    if g_snap_back_pos[obj.getGUID()] ~= nil then obj.setPosition(g_snap_back_pos[obj.getGUID()]) end
-    g_snap_back_pos[obj.getGUID()] = nil
-    return
-  end
-  --check for existing master color match and student counts
-  for tag,tile in pairs(GD.cities[city_id].tiles) do
-    if obj.hasTag(tag) then
-      if tile.n > 0 then
-        if obj.getGMNotes() ~= tile.c then
-          if env.test.debug then log("another player already played a "..obj.getName().." here") end
-          obj.setVelocity(Vector(0,0,0))
-          if g_snap_back_pos[obj.getGUID()] ~= nil then obj.setPosition(g_snap_back_pos[obj.getGUID()]) end
-          g_snap_back_pos[obj.getGUID()] = nil
-          return
-        elseif tile.n >= 2 then
+  if env.test.trace then log("onObjectDrop(): "..pcol.." dropped "..obj.getGUID()) end
+  --ignore non-tile objects
+  if obj.tag ~= "Tile" then return end
+  --Ignore if dropped off board
+  local board = getObjectFromGUID(C.board_guid)
+  local center = board.getBounds()["center"]
+  local size = board.getBounds()["size"]
+  local pos = obj.getPosition()
+  if pos.x > center.x + (size.x/2) or pos.x < center.x - (size.x/2) then return end
+  if pos.z > center.z + (size.z/2) or pos.z < center.z - (size.z/2) then return end
+	--Check play limits
+	if GD.stage == "play" then
+		if GD.played_tiles == 2 then
+			broadcastToColor("Play no more than 2 students", pcol)
+			obj.setVelocity(Vector(0,0,0))
+			obj.setPosition(snap_back)
+			return
+		end
+	else
+		--TODO: check setup limits
+	end
+  --Get tile metadata
+  local snap_back = C.tiles[obj.getGUID()].p
+  assert(snap_back,"ERROR: onObjectDrop(): failed to locate snap back pos for "..obj.getGUID())
+  local type = C.tiles[obj.getGUID()].t
+  assert(type,"ERROR: onObjectDrop(): failed to locate type for "..obj.getGUID())
+  local color = C.tiles[obj.getGUID()].c
+  assert(color,"ERROR: onObjectDrop(): failed to locate color for "..obj.getGUID())
+  if env.test.debug then log("Tile:"..obj.getGUID()..", type:"..type..", color:"..color..", Snap:"..tostring(snap_back)) end
+  --Locate nearest city
+  local city_id = findNearestCity(obj.getPosition())
+  assert(city_id > 0,"ERROR: onObjectDrop(): Could not locate nearest city")
+  local city = GD.cities[city_id]
+  if contains(city.tiles, obj.getGUID()) then
+    if env.test.debug then log("ignoring tile drop in same city") end
+  else
+    --Check against existing tiles in city TODO: handle setup vs play limits
+    local count = 0
+    for _,tg in pairs(city.tiles) do
+      local tile = C.tiles[tg]
+      if tile.t == type and tile.c ~= color then
+        if env.test.debug then log("another player already played a "..obj.getName().." here") end
+        obj.setVelocity(Vector(0,0,0))
+        obj.setPosition(snap_back)
+        return
+      elseif tile.t == type and tile.c == color then
+        count = count + 1
+        if count >= 2 then
           if env.test.debug then log("already a "..obj.getName().." student here, cannot play another") end
           obj.setVelocity(Vector(0,0,0))
-          if g_snap_back_pos[obj.getGUID()] ~= nil then obj.setPosition(g_snap_back_pos[obj.getGUID()]) end
-          g_snap_back_pos[obj.getGUID()] = nil
+          obj.setPosition(snap_back)
           return
-        else
-          if env.test.debug then log("valid student for "..obj.getName()) end
-          tile.n = tile.n + 1
-          break
         end
-      else
-        if env.test.debug then log("new master tile for "..obj.getName()) end
-        tile.c = obj.getGMNotes()
-        tile.n = tile.n + 1
-        break
       end
     end
+    if env.test.debug then
+      if count == 0 then
+				if GD.stage == "play" then
+					--TODO: reject new masters
+				end
+        log("valid master tile for "..obj.getName())
+      else
+        log("valid student for "..obj.getName())
+      end
+    end
+    table.insert(city.tiles,obj.getGUID())
   end
   --Locate tile in appropriate spot in city
   local cpos = GD.cities[city_id].pos
   local dx, dz
-  if obj.hasTag("Rain") then
-    dx = -0.5
-    dz = 1
-  elseif obj.hasTag("Astro") then
-    dx = 0.5
-    dz = 1
-  elseif obj.hasTag("Dragon") then
-    dx = -1
-    dz = 0
-  elseif obj.hasTag("Priest") then
-    dx = 0
-    dz = 0
-  elseif obj.hasTag("Yeti") then
-    dx = 1
-    dz = 0
-  elseif obj.hasTag("Fire") then
-    dx = -0.5
-    dz = -1
-  elseif obj.hasTag("Healer") then
-    dx = 0.5
-    dz = -1
+  if type == "Rain" then dx,dz = -0.5,1
+  elseif type == "Astro" then dx,dz = 0.5,1
+  elseif type == "Dragon" then dx,dz = -1,0
+  elseif type == "Priest" then dx,dz = 0,0
+  elseif type == "Yeti" then dx,dz = 1,0
+  elseif type == "Fire" then dx,dz = -0.5,-1
+  elseif type == "Healer" then dx,dz = 0.5,-1
   else
     log("ERROR: Tile "..obj.getGUID().." has no matching tag")
     return
   end
   obj.setPosition(Vector(cpos.x + dx, 2, cpos.z + dz))
+  Wait.condition(function() obj.setLock(true) end, function() return obj.isDestroyed() or obj.resting end, 5)
+  --add undo action
+  local undo = {
+    action = "tile_drop",
+    guid = obj.getGUID(),
+  }
+  table.insert(GD.undo, undo)
+	if GD.stage == "setup" then
+		--TODO: handle game setup limit checks
+		-- one tile of each type per player
+		-- no more than 2 tiles of a color in city (1 for 3 player)
+		-- no more than 3 tiles per city total (2 for 3 player)
+	else
+		GD.played_tiles = GD.played_tiles + 1
+	  updateScore()
+		local board = getObjectFromGUID(C.board_guid)
+		board.UI.setAttribute(pcol.."JourneyPanel","active","false")
+		board.UI.setAttribute(pcol.."UndoPanel","active","true")
+	end
 end
 
+--[[ Update player scores for all masters in cities. ]]
+function updateScore()
+  if env.test.trace then log("updateScore()") end
+
+  log("TODO: update player scores")
+
+end
+
+--[[ Process any undo actions. ]]
+function undo(pcol)
+  if env.test.trace then log("undo(): "..pcol) end
+  for _,undo in ipairs(GD.undo) do
+    if undo.action == "tile_drop" then
+      local tile = getObjectFromGUID(undo.guid)
+      assert(tile, "ERROR: undo(): no tile found for "..tostring(undo.guid))
+      tile.setLock(false)
+      local snap_back = C.tiles[undo.guid].p
+      assert(snap_back,"ERROR: undo(): failed to locate snap back pos for "..tostring(undo.guid))
+      tile.setVelocity(Vector(0,0,0))
+      tile.setPosition(snap_back)
+    elseif undo.action == "start-journey" then
+			--undo start Journey, not the
+			disableBridgeButtons()
+    else
+      log("ERROR: undo() Unknown action")
+    end
+  end
+  updateScore()
+	GD.undo = {}
+	local board = getObjectFromGUID(C.board_guid)
+	board.UI.setAttribute(pcol.."JourneyPanel","active","true")
+	board.UI.setAttribute(pcol.."UndoPanel","active","false")
+	board.UI.setAttribute(pcol.."DonePanel","active","true")
+end
+
+function studentJourney(params)
+	log("Player "..params.pcol.." starts a student journey!")
+	log(params)
+	bridge = GD.bridges[params.guid]
+	--The "downArrow" is moving from smaller number city to bigger.  "upArrow" is moving from bigger to smaller.
+	if params.id == "downArrow" then
+		log("Students move from city "..tostring(bridge.cities[1]).." to city "..tostring(bridge.cities[2]))
+	else
+		log("Students move from city "..tostring(bridge.cities[2]).." to city "..tostring(bridge.cities[1]))
+	end
+	log("across bridge id "..tostring(bridge.id))
+
+	disableBridgeButtons()
+
+	--TODO: this moves to journey confirmation dialog?
+	local board = getObjectFromGUID(C.board_guid)
+	board.UI.setAttribute(params.pcol.."DonePanel","active","true")
+
+end
+
+function enableBridgeButtons()
+	--TODO: make this smart, only enable valid buttons per journey limitations in rules
+	--The "downArrow" is moving from smaller number city to bigger.  "upArrow" is moving from bigger to smaller.
+	--Only enable arrows where player has at least one student in beginning city (city moved from)
+	for g,_ in pairs(GD.bridges) do
+		local b = getObjectFromGUID(g)
+		b.UI.setAttribute("mainPanel", "active", "true")
+	end
+end
+
+function disableBridgeButtons()
+	for g,_ in pairs(GD.bridges) do
+		local b = getObjectFromGUID(g)
+		b.UI.setAttribute("mainPanel", "active", "false")
+	end
+end
+
+function buttonClick(player, btn, id)
+	log("buttonClick(): Player: "..player.color..", id: "..id)
+	local pcol = Split(id,'-')[1]
+	if player.color ~= pcol then return end --ignore other players
+	if player.color ~= C.player_colors[GD.current_player] then return end
+	local action = Split(id,'-')[2]
+	local board = getObjectFromGUID(C.board_guid)
+	if action == "done" then
+		playerDone(player.color)
+	elseif action == "undo" then
+		log("TODO: undo any player actions")
+		undo(player.color)
+	elseif action == "pass" then
+		log("TODO: pass to next player")
+	elseif action == "journey" then
+		log("TODO: start student journey")
+		enableBridgeButtons()
+		board.UI.setAttribute(pcol.."JourneyPanel","active","false")
+		board.UI.setAttribute(pcol.."UndoPanel","active","true")
+		board.UI.setAttribute(pcol.."DonePanel","active","false")
+		-- local undo = {action = "start-journey"}
+		table.insert(GD.undo, {action = "start-journey"})
+	else
+		log("ERROR: buttonClick(): No recognized action.")
+		return
+	end
+end
+
+function playerDone(pcol)
+	if env.test.trace then log("playerDone() "..pcol) end
+	local board = getObjectFromGUID(C.board_guid)
+	local current = C.player_colors[GD.current_player]
+	board.UI.setAttribute(current.."PlayerPanel", "active", "false")
+	GD.current_player = GD.current_player + 1
+	if GD.current_player > 4 then GD.current_player = 1 end --wrap
+	current = C.player_colors[GD.current_player]
+	if env.test.debug then log("Current player is now "..current) end
+	board.UI.setAttribute(current.."DonePanel", "active", "true")
+	board.UI.setAttribute(current.."UndoPanel", "active", "false")
+	board.UI.setAttribute(current.."JourneyPanel", "active", "true")
+	board.UI.setAttribute(current.."PlayerPanel", "active", "true")
+
+end
+
+--//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+--[[ DEV ONLY: build metadata code of objects selected and paste to Notes. ]]
+function getPositions(pcol)
+  local stuff = Player[pcol].getSelectedObjects()
+  local s = ""
+  for _,o in ipairs(stuff) do
+    local p = o.getPosition()
+    -- local t = '["'..o.getGUID()..'"]={t="'..o.getTags()[1]..'", c="'..o.getGMNotes()..'", p={x='..tostring(p.x)..", y="..tostring(p.y)..", z="..tostring(p.z).."},},"
+    local t = '["'..o.getGUID()..'"]={p={x='..tostring(p.x)..", y="..tostring(p.y)..", z="..tostring(p.z).."},},"
+    log(t)
+    s = s .. t .. '\n'
+  end
+  if s ~= "" then
+    Notes.setNotes(s)
+  end
+end
 
 require("tts-bosl/Constants")
 require("tts-lib/utils")
