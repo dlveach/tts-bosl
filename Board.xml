@@ -58,6 +58,9 @@
         <Panel id="YellowJourneyPanel" padding="10 0 0 0">
           <Button id="Yellow-journey" text="Journey"/>
         </Panel>
+        <Panel id="YellowPlacementPanel" padding="0 0 0 0" active="false">
+          <Button id="Yellow-placement" text="Place Master" raycastTarget="false"/>
+        </Panel>
       </Cell>
     </Row>
   </TableLayout>
@@ -79,6 +82,9 @@
       <Cell padding="10 0 0 0">
         <Panel id="RedJourneyPanel" padding="10 0 0 0">
           <Button id="Red-journey" text="Journey"/>
+        </Panel>
+        <Panel id="RedPlacementPanel" padding="10 0 0 0" active="false">
+          <Button id="Red-placement" text="Place Master" raycastTarget="false"/>
         </Panel>
       </Cell>
     </Row>
@@ -102,6 +108,9 @@
         <Panel id="BlueJourneyPanel" padding="10 0 0 0">
           <Button id="Blue-journey" text="Journey"/>
         </Panel>
+        <Panel id="BluePlacementPanel" padding="10 0 0 0" active="false">
+          <Button id="Blue-placement" text="Place Master" raycastTarget="false"/>
+        </Panel>
       </Cell>
     </Row>
   </TableLayout>
@@ -123,6 +132,9 @@
       <Cell padding="10 0 0 0">
         <Panel id="PurpleJourneyPanel" padding="10 0 0 0">
           <Button id="Purple-journey" text="Journey"/>
+        </Panel>
+        <Panel id="PurplePlacementPanel" padding="10 0 0 0" active="false">
+          <Button id="Purple-placement" text="Place Master" raycastTarget="false"/>
         </Panel>
       </Cell>
     </Row>

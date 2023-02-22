@@ -8,44 +8,195 @@ env.test = {}
 env.test.in_dev = true
 env.test.debug = true
 env.test.trace = true
+env.test.force_fresh_save = true
+env.test.test_players = {"Blue","Yellow","Red","Purple"}
+-- env.test.test_players = {"Blue","Yellow","Red"}
 
 GD = {}
-GD.game = {}
 
---[[ Load function ]]
+--[[ *****************************
+Load function
+********************************]]
 function onLoad(save_state)
 	if env.trace then log("onLoad()") end
+	if env.test.force_fresh_save then saved_data = "" end
+	--initialize objects
+	local board = getObjectFromGUID(C.board_guid)
+	if not(env.test.in_dev) then
+		board.interactable = false
+		for g,_ in pairs(C.markers) do
+			getObjectFromGUID(g).interactable = false
+		end
+		for g,_ in pairs(C.tiles) do
+			getObjectFromGUID(g).interactable = false
+		end
+		getObjectFromGUID(C.trash_guid).interactable = false
+	end
 
-  --TODO: check for reload saved state
+	if (saved_data ~= "") then
+    log("Global: saved load")
+    local restore_data = JSON.decode(saved_data)
+    GD = restore_data
+    restoreGameState()
+  else
+		onLoadInit()
+	end
+end
 
+--[[ *****************************
+Save game state
+********************************]]
+function onSave()
+  local saved_data = JSON.encode(GD)
+  if env.test.force_fresh_save then
+    saved_data = ""
+  end
+  return saved_data
+end
+
+--[[ *****************************
+Restore the game state.
+********************************]]
+function restoreGameState()
+	if env.test.trace then log("restoreGameState()") end
+	--TODO: ???
+end
+
+--[[ *****************************
+Initial load setup.
+********************************]]
+function onLoadInit()
+	if env.test.trace then log("onLoadInit()") end
+	GD.game = {}
+	GD.env = {}
+	GD.state = {}
 	GD.bridges = {}
 	for _,bridge in ipairs(C.bridges) do
 		GD.bridges[bridge.guid]=bridge
 	end
   GD.cities = simpleDeepCopy(C.cities)
-	local board = getObjectFromGUID(C.board_guid)
-	if not(env.test.in_dev) then
-		board.interactable = false
-	end
-	GD.current_player = math.random(1,4)
-	local current = C.player_colors[GD.current_player]
-  if env.test.debug then log("Current player is "..current) end
+	GD.game.player_order = {}
+	GD.env.use_suggested_placement = false
+	GD.game.played_tiles = 0
+	GD.game.undo = {}
+	GD.game.stage = "init"
+	GD.game.current_player = ""
+
+	--TODO: display start game dialog
+end
+
+--[[ *****************************
+Start the game after all players are seated.
+********************************]]
+function startGame()
+	if env.test.trace then log("startGame()") end
+	--Determine number of players
+	local seated = getSeatedPlayers()
+	if env.test.test_players then seated = env.test.test_players end
 	for _,pcol in ipairs(C.player_colors) do
-		board.UI.setAttribute(pcol.."PlayerPanel","active",pcol == current)
-		board.UI.setAttribute(pcol.."UndoPanel","active","false")
+		if contains(seated, pcol) then
+			table.insert(GD.game.player_order, pcol)
+		end
 	end
-  GD.undo = {}
-	GD.played_tiles = 0
-	GD.stage = "play" --TODO: change to "setup" when implemented
+	local player_count = #GD.game.player_order
+	if player_count < 3 then
+		broadcastToAll("3 or 4 players needed to play this game.")
+		return
+	end
+	GD.game.current_player = math.random(1,#GD.game.player_order)
+	local current = GD.game.player_order[GD.game.current_player]
+	if env.test.debug then log("Current player is "..current) end
+	if GD.env.use_suggested_placement then
+		if player_count == 3 then
+			suggested3Player()
+		elseif #GD.game.player_order == 4 then
+			suggested4Player()
+		else
+			log("ERROR: startGame(): Invalid player count")
+			return
+		end
 
+		--TODO: hide start dialog
+
+		GD.game.stage = "play"
+		for g,_ in pairs(C.tiles) do
+			getObjectFromGUID(g).interactable = true
+		end
+	else
+		GD.game.stage = "placement"
+		for g,d in pairs(C.tiles) do
+			getObjectFromGUID(g).interactable = d.i
+		end
+	end
+	setActivePlayer(false)
 end
 
---[[ Save function ]]
-function onSave()
-  --TODO: Save state
+--[[ *****************************
+TODO: doc
+********************************]]
+function suggested3Player()
+	if env.test.trace then log("suggested3Player()") end
+	for g,td in pairs(C.suggested_3_Player) do
+		local tile = getObjectFromGUID(g)
+		locateTile(tile, td.city)
+	end
+	local marker = getObjectFromGUID(C.last_marker)
+	local city = GD.cities[3]
+	local pos = Vector(city.pos)
+	pos.y = 2
+	marker.setPosition(pos)
+	local trash = getObjectFromGUID(C.trash_guid)
+	for g,bd in pairs(GD.bridges) do
+		if bd.id == 2 or bd.id == 8 or bd.id == 9 then
+			log("trash bridge "..g)
+			trash.putObject(getObjectFromGUID(g))
+			bd.intact = false
+		end
+	end
 end
 
---[[ Locate ID in the network of nearest city to dropped tile position.  Returns -1 if not found. ]]
+--[[ *****************************
+TODO: doc
+********************************]]
+function suggested4Player()
+	if env.test.trace then log("suggested4Player()") end
+	for g,td in pairs(C.suggested_4_Player) do
+		local tile = getObjectFromGUID(g)
+		locateTile(tile, td.city)
+	end
+end
+
+--[[ *****************************
+TODO: doc
+********************************]]
+function setActivePlayer(advance)
+	if advance == nil then advance = true end
+	local board = getObjectFromGUID(C.board_guid)
+	local current = GD.game.player_order[GD.game.current_player]
+	local old = current
+	if advance then
+		board.UI.setAttribute(current.."PlayerPanel", "active", "false")
+		GD.game.current_player = GD.game.current_player + 1
+		if GD.game.current_player > 4 then GD.game.current_player = 1 end --wrap
+		current = GD.game.player_order[GD.game.current_player]
+		if env.test.debug then log("Current player is now "..current) end
+		if env.test.test_players then
+			Player[old].changeColor(current)
+		end
+	end
+	for _,pcol in ipairs(GD.game.player_order) do
+		board.UI.setAttribute(pcol.."UndoPanel","active","false")
+		board.UI.setAttribute(pcol.."DonePanel","active",GD.game.stage=="play")
+		board.UI.setAttribute(pcol.."JourneyPanel","active",GD.game.stage=="play")
+		board.UI.setAttribute(pcol.."PlacementPanel","active",GD.game.stage=="placement")
+		board.UI.setAttribute(pcol.."PlayerPanel","active",pcol == current)
+	end
+	GD.game.undo = {}
+end
+
+--[[ *****************************
+Locate ID in the network of nearest city to dropped tile position.  Returns -1 if not found.
+********************************]]
 function findNearestCity(pos)
   assert(pos, "ERROR: findNearestCity(): missing parameter 'pos'")
   if env.test.trace then log("findNearestCity()") end
@@ -71,7 +222,9 @@ function findNearestCity(pos)
   end
 end
 
---[[ Handle dropping a tile in a city and update network info. ]]
+--[[ *****************************
+Handle dropping a tile in a city and update network info.
+********************************]]
 function onObjectDrop(pcol, obj)
   if env.test.trace then log("onObjectDrop(): "..pcol.." dropped "..obj.getGUID()) end
   --ignore non-tile objects
@@ -83,17 +236,6 @@ function onObjectDrop(pcol, obj)
   local pos = obj.getPosition()
   if pos.x > center.x + (size.x/2) or pos.x < center.x - (size.x/2) then return end
   if pos.z > center.z + (size.z/2) or pos.z < center.z - (size.z/2) then return end
-	--Check play limits
-	if GD.stage == "play" then
-		if GD.played_tiles == 2 then
-			broadcastToColor("Play no more than 2 students", pcol)
-			obj.setVelocity(Vector(0,0,0))
-			obj.setPosition(snap_back)
-			return
-		end
-	else
-		--TODO: check setup limits
-	end
   --Get tile metadata
   local snap_back = C.tiles[obj.getGUID()].p
   assert(snap_back,"ERROR: onObjectDrop(): failed to locate snap back pos for "..obj.getGUID())
@@ -102,6 +244,35 @@ function onObjectDrop(pcol, obj)
   local color = C.tiles[obj.getGUID()].c
   assert(color,"ERROR: onObjectDrop(): failed to locate color for "..obj.getGUID())
   if env.test.debug then log("Tile:"..obj.getGUID()..", type:"..type..", color:"..color..", Snap:"..tostring(snap_back)) end
+	--disallow dropping more than one tile
+	local set = Player[pcol].getSelectedObjects()
+	if #set > 1 then
+		if env.test.debug then log(pcol.." cannot place multiple tiles on the board") end
+		obj.setVelocity(Vector(0,0,0))
+		obj.setPosition(snap_back)
+		return
+	end
+	--disallow non-active player to place tiles on board
+	if pcol != GD.game.player_order[GD.game.current_player] then
+		if env.test.debug then log(pcol.." is not the active player") end
+		obj.setVelocity(Vector(0,0,0))
+		obj.setPosition(snap_back)
+		return
+	end
+	--disallow active player placing other's tiles
+	if pcol != color then
+		if env.test.debug then log(pcol.." cannot place other's tiles") end
+		obj.setVelocity(Vector(0,0,0))
+		obj.setPosition(snap_back)
+		return
+	end
+	--Check student tile play limits
+	if GD.game.stage == "play" and GD.game.played_tiles == 2 then
+		broadcastToColor("Play no more than 2 students", pcol)
+		obj.setVelocity(Vector(0,0,0))
+		obj.setPosition(snap_back)
+		return
+	end
   --Locate nearest city
   local city_id = findNearestCity(obj.getPosition())
   assert(city_id > 0,"ERROR: onObjectDrop(): Could not locate nearest city")
@@ -109,39 +280,91 @@ function onObjectDrop(pcol, obj)
   if contains(city.tiles, obj.getGUID()) then
     if env.test.debug then log("ignoring tile drop in same city") end
   else
-    --Check against existing tiles in city TODO: handle setup vs play limits
-    local count = 0
-    for _,tg in pairs(city.tiles) do
-      local tile = C.tiles[tg]
-      if tile.t == type and tile.c ~= color then
-        if env.test.debug then log("another player already played a "..obj.getName().." here") end
-        obj.setVelocity(Vector(0,0,0))
-        obj.setPosition(snap_back)
-        return
-      elseif tile.t == type and tile.c == color then
-        count = count + 1
-        if count >= 2 then
-          if env.test.debug then log("already a "..obj.getName().." student here, cannot play another") end
-          obj.setVelocity(Vector(0,0,0))
-          obj.setPosition(snap_back)
-          return
-        end
-      end
-    end
-    if env.test.debug then
-      if count == 0 then
-				if GD.stage == "play" then
-					--TODO: reject new masters
+		if GD.game.stage == "play" then
+	    local count = 0
+	    for _,tg in pairs(city.tiles) do
+	      local tile = C.tiles[tg]
+	      if tile.t == type and tile.c ~= color then
+	        if env.test.debug then log("another player already played a "..obj.getName().." here") end
+	        obj.setVelocity(Vector(0,0,0))
+	        obj.setPosition(snap_back)
+	        return
+	      elseif tile.t == type and tile.c == color then
+	        count = count + 1
+	        if count >= 2 then
+	          if env.test.debug then log("already a "..obj.getName().." student here, cannot play another") end
+	          obj.setVelocity(Vector(0,0,0))
+	          obj.setPosition(snap_back)
+	          return
+	        end
+	      end
+	    end
+			if count == 0 then
+				if env.test.debug then log("Cannot place new masters during play, only students") end
+				obj.setVelocity(Vector(0,0,0))
+				obj.setPosition(snap_back)
+				return
+	    end
+	    if env.test.debug then log("valid student for "..obj.getName()) end
+		elseif GD.game.stage == "placement" then
+			-- no more than 3 tiles per city total (2 for 3 player)
+			local pnum = #GD.game.player_order
+			if (pnum == 3 and #city.tiles >= 2) or (pnum == 4 and #city.tiles >= 3) then
+				if env.test.debug then log("Maximum masters placed in city "..tostring(city.id)) end
+				obj.setVelocity(Vector(0,0,0))
+				obj.setPosition(snap_back)
+				return
+			end
+			-- cannot play same master as another color
+			-- no more than 2 tiles of a color in city (1 for 3 player)
+			local count = 0
+	    for _,tg in pairs(city.tiles) do
+	      local tile = C.tiles[tg]
+				if tile.t == type and tile.c ~= color then
+					if env.test.debug then log("Another player already played a "..obj.getName().." here") end
+					obj.setVelocity(Vector(0,0,0))
+					obj.setPosition(snap_back)
+					return
+				elseif tile.c == color then
+	        count = count + 1
 				end
-        log("valid master tile for "..obj.getName())
-      else
-        log("valid student for "..obj.getName())
-      end
-    end
-    table.insert(city.tiles,obj.getGUID())
+			end
+			if (pnum == 3 and count >= 1) or (pnum == 4 and count >= 2) then
+				if env.test.debug then log("Maximum masters placed in city for player color "..pcol) end
+				obj.setVelocity(Vector(0,0,0))
+				obj.setPosition(snap_back)
+				return
+			end
+			if env.test.debug then log(pcol.." places "..obj.getName().." master in city "..tostring(city.id)) end
+		end
   end
-  --Locate tile in appropriate spot in city
-  local cpos = GD.cities[city_id].pos
+	locateTile(obj, city.id)
+  local undo = {
+    action = "tile_drop",
+    guid = obj.getGUID(),
+  }
+  table.insert(GD.game.undo, undo)
+	GD.game.played_tiles = GD.game.played_tiles + 1
+	if GD.game.stage == "placement" then
+		local board = getObjectFromGUID(C.board_guid)
+		board.UI.setAttribute(pcol.."UndoPanel","active","true")
+		board.UI.setAttribute(pcol.."DonePanel","active","true")
+		board.UI.setAttribute(pcol.."PlacementPanel","active","false")
+	else
+	  updateScores()
+		local board = getObjectFromGUID(C.board_guid)
+		board.UI.setAttribute(pcol.."JourneyPanel","active","false")
+		board.UI.setAttribute(pcol.."UndoPanel","active","true")
+	end
+end
+
+--[[ *****************************
+Locate a tile in the appropriate spot in a city
+********************************]]
+function locateTile(tile, city_id)
+	if env.test.trace then log("locateTile()") end
+	local cpos = GD.cities[city_id].pos
+	local type = C.tiles[tile.getGUID()].t
   local dx, dz
   if type == "Rain" then dx,dz = -0.5,1
   elseif type == "Astro" then dx,dz = 0.5,1
@@ -151,43 +374,48 @@ function onObjectDrop(pcol, obj)
   elseif type == "Fire" then dx,dz = -0.5,-1
   elseif type == "Healer" then dx,dz = 0.5,-1
   else
-    log("ERROR: Tile "..obj.getGUID().." has no matching tag")
+    log("ERROR: Tile "..tile.getGUID().." has no matching tag")
     return
   end
-  obj.setPosition(Vector(cpos.x + dx, 2, cpos.z + dz))
-  Wait.condition(function() obj.setLock(true) end, function() return obj.isDestroyed() or obj.resting end, 5)
-  --add undo action
-  local undo = {
-    action = "tile_drop",
-    guid = obj.getGUID(),
-  }
-  table.insert(GD.undo, undo)
-	if GD.stage == "setup" then
-		--TODO: handle game setup limit checks
-		-- one tile of each type per player
-		-- no more than 2 tiles of a color in city (1 for 3 player)
-		-- no more than 3 tiles per city total (2 for 3 player)
-	else
-		GD.played_tiles = GD.played_tiles + 1
-	  updateScore()
-		local board = getObjectFromGUID(C.board_guid)
-		board.UI.setAttribute(pcol.."JourneyPanel","active","false")
-		board.UI.setAttribute(pcol.."UndoPanel","active","true")
+	tile.setVelocity(Vector(0,0,0))
+  tile.setPosition(Vector(cpos.x + dx, 2, cpos.z + dz))
+	table.insert(GD.cities[city_id].tiles, tile.getGUID())
+  Wait.condition(function() tile.setLock(true) end, function() return tile.isDestroyed() or tile.resting end, 5)
+end
+
+--[[ *****************************
+Update player scores for masters in cities.
+********************************]]
+function updateScores()
+  if env.test.trace then log("updateScores()") end
+  --For each player color, for each city, sum up all masters and cities with at least one master
+	GD.game.scores = {}
+	for _,pcol in ipairs(GD.game.player_order) do
+		GD.game.scores[pcol]={cities=0,masters=0}
 	end
+	for pcol,score in pairs(GD.game.scores) do
+		for _,city in ipairs(GD.cities) do
+			local city_has_master = false
+			local masters = {}
+			for _,g in ipairs(city.tiles) do
+				if C.tiles[g].c == pcol then
+					if not(city_has_master) then score.cities = score.cities + 1 end
+					city_has_master = true
+					if not(contains(masters, C.tiles[g].t)) then table.insert(masters, C.tiles[g].t) end --skip students
+				end
+			end
+			score.masters = score.masters + #masters
+		end
+	end
+	if env.test.debug then log(GD.game.scores) end
 end
 
---[[ Update player scores for all masters in cities. ]]
-function updateScore()
-  if env.test.trace then log("updateScore()") end
-
-  log("TODO: update player scores")
-
-end
-
---[[ Process any undo actions. ]]
+--[[ *****************************
+Process any undo actions.
+********************************]]
 function undo(pcol)
   if env.test.trace then log("undo(): "..pcol) end
-  for _,undo in ipairs(GD.undo) do
+  for _,undo in ipairs(GD.game.undo) do
     if undo.action == "tile_drop" then
       local tile = getObjectFromGUID(undo.guid)
       assert(tile, "ERROR: undo(): no tile found for "..tostring(undo.guid))
@@ -196,6 +424,10 @@ function undo(pcol)
       assert(snap_back,"ERROR: undo(): failed to locate snap back pos for "..tostring(undo.guid))
       tile.setVelocity(Vector(0,0,0))
       tile.setPosition(snap_back)
+			for _,city in ipairs(GD.cities) do
+				local i = indexOf(city.tiles, tile.getGUID())
+				if i>0 then table.remove(city.tiles,i) end
+			end
     elseif undo.action == "start-journey" then
 			--undo start Journey, not the
 			disableBridgeButtons()
@@ -203,25 +435,34 @@ function undo(pcol)
       log("ERROR: undo() Unknown action")
     end
   end
-  updateScore()
-	GD.undo = {}
+  updateScores()
+	GD.game.undo = {}
+	if GD.game.stage == "play" then
+		GD.game.played_tiles = 0
+	else
+		GD.game.played_tiles = GD.game.played_tiles - 1
+	end
 	local board = getObjectFromGUID(C.board_guid)
-	board.UI.setAttribute(pcol.."JourneyPanel","active","true")
 	board.UI.setAttribute(pcol.."UndoPanel","active","false")
-	board.UI.setAttribute(pcol.."DonePanel","active","true")
+	board.UI.setAttribute(pcol.."JourneyPanel","active",GD.game.stage=="play")
+	board.UI.setAttribute(pcol.."PlacementPanel","active",GD.game.stage=="placement")
+	board.UI.setAttribute(pcol.."DonePanel","active",GD.game.stage=="play")
 end
 
+--[[ *****************************
+TODO: doc
+********************************]]
 function studentJourney(params)
-	log("Player "..params.pcol.." starts a student journey!")
-	log(params)
+	if env.test.trace then log("studentJourney()") end
+	if env.test.debug then log(params) end
 	bridge = GD.bridges[params.guid]
 	--The "downArrow" is moving from smaller number city to bigger.  "upArrow" is moving from bigger to smaller.
 	if params.id == "downArrow" then
-		log("Students move from city "..tostring(bridge.cities[1]).." to city "..tostring(bridge.cities[2]))
+		if env.test.debug then log("Students move from city "..tostring(bridge.cities[1]).." to city "..tostring(bridge.cities[2])) end
 	else
-		log("Students move from city "..tostring(bridge.cities[2]).." to city "..tostring(bridge.cities[1]))
+		if env.test.debug then log("Students move from city "..tostring(bridge.cities[2]).." to city "..tostring(bridge.cities[1])) end
 	end
-	log("across bridge id "..tostring(bridge.id))
+	if env.test.debug then log("across bridge id "..tostring(bridge.id)) end
 
 	disableBridgeButtons()
 
@@ -231,6 +472,9 @@ function studentJourney(params)
 
 end
 
+--[[ *****************************
+TODO: doc
+********************************]]
 function enableBridgeButtons()
 	--TODO: make this smart, only enable valid buttons per journey limitations in rules
 	--The "downArrow" is moving from smaller number city to bigger.  "upArrow" is moving from bigger to smaller.
@@ -241,6 +485,9 @@ function enableBridgeButtons()
 	end
 end
 
+--[[ *****************************
+TODO: doc
+********************************]]
 function disableBridgeButtons()
 	for g,_ in pairs(GD.bridges) do
 		local b = getObjectFromGUID(g)
@@ -248,49 +495,44 @@ function disableBridgeButtons()
 	end
 end
 
+--[[ *****************************
+TODO: doc
+********************************]]
 function buttonClick(player, btn, id)
-	log("buttonClick(): Player: "..player.color..", id: "..id)
+	if env.test.trace then log("buttonClick(): Player: "..player.color..", id: "..id) end
 	local pcol = Split(id,'-')[1]
 	if player.color ~= pcol then return end --ignore other players
-	if player.color ~= C.player_colors[GD.current_player] then return end
+	if player.color ~= GD.game.player_order[GD.game.current_player] then return end
 	local action = Split(id,'-')[2]
+	if env.test.debug then log("action is "..action) end
 	local board = getObjectFromGUID(C.board_guid)
 	if action == "done" then
-		playerDone(player.color)
+		if GD.game.played_tiles == 7 * #GD.game.player_order then
+			broadcastToAll("All initial masters placed, start game play!")
+			GD.game.stage = "play"
+			for g,_ in pairs(C.tiles) do
+				getObjectFromGUID(g).interactable = true
+			end
+		end
+		if GD.game.stage == "play" then GD.game.played_tiles = 0 end
+	  GD.game.undo = {}
+		setActivePlayer()
 	elseif action == "undo" then
-		log("TODO: undo any player actions")
 		undo(player.color)
-	elseif action == "pass" then
-		log("TODO: pass to next player")
 	elseif action == "journey" then
-		log("TODO: start student journey")
 		enableBridgeButtons()
 		board.UI.setAttribute(pcol.."JourneyPanel","active","false")
 		board.UI.setAttribute(pcol.."UndoPanel","active","true")
 		board.UI.setAttribute(pcol.."DonePanel","active","false")
-		-- local undo = {action = "start-journey"}
-		table.insert(GD.undo, {action = "start-journey"})
+		table.insert(GD.game.undo, {action = "start-journey"})
+	elseif action == "placement" then
+		--ignore
 	else
 		log("ERROR: buttonClick(): No recognized action.")
 		return
 	end
 end
 
-function playerDone(pcol)
-	if env.test.trace then log("playerDone() "..pcol) end
-	local board = getObjectFromGUID(C.board_guid)
-	local current = C.player_colors[GD.current_player]
-	board.UI.setAttribute(current.."PlayerPanel", "active", "false")
-	GD.current_player = GD.current_player + 1
-	if GD.current_player > 4 then GD.current_player = 1 end --wrap
-	current = C.player_colors[GD.current_player]
-	if env.test.debug then log("Current player is now "..current) end
-	board.UI.setAttribute(current.."DonePanel", "active", "true")
-	board.UI.setAttribute(current.."UndoPanel", "active", "false")
-	board.UI.setAttribute(current.."JourneyPanel", "active", "true")
-	board.UI.setAttribute(current.."PlayerPanel", "active", "true")
-
-end
 
 --//////////////////////////////////////////////////////////////////////////////////////////////////////
 
