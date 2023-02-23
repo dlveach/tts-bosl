@@ -1,5 +1,15 @@
 --[[
   TODO: documentation
+
+	TODO:
+	- confirmation dialog for Done (pass) if less than 2 students placed
+	- HUD for scores
+	- implement journey
+	- implement journey undo
+	- Bridge UI setAttribute wrapper (save state on bridge UIs)
+	- implement state restore
+	- implement verbose player logging
+
 ]]
 
 env = {}
@@ -11,6 +21,7 @@ env.test.trace = true
 env.test.force_fresh_save = true
 env.test.test_players = {"Blue","Yellow","Red","Purple"}
 -- env.test.test_players = {"Blue","Yellow","Red"}
+env.test.hide_start_panel = false
 
 GD = {}
 
@@ -59,8 +70,56 @@ Restore the game state.
 ********************************]]
 function restoreGameState()
 	if env.test.trace then log("restoreGameState()") end
-	--TODO: ???
+	--[[ replay saved global UI setAttributes --]]
+	if env.test.debug then log("replay saved global UI setAttributes") end
+  for key,value in pairs(GD.states.global_UI) do
+    local id = Split(key, '|')[1]
+    local field = Split(key, '|')[2]
+    local success = UI.setAttribute(id, field, value)
+    if not(success) and env.test.debug then
+      log("ERROR: restoreGameState(): Unable to setAttribute for global UI"..field.." on id "..id.." to "..tostring(value))
+    end
+  end
+	--[[ replay saved board UI setAttributes --]]
+  if env.test.debug then log("replay saved board UI setAttributes") end
+  local board = getObjectFromGUID(C.main_board)
+  for key,value in pairs(GD.states.board_UI) do
+    local id = Split(key, '|')[1]
+    local field = Split(key, '|')[2]
+    local success = board_UI_setAttribute(id, field, value)
+    if not(success) and env.test.debug then
+      log("ERROR: restoreGameState(): Unable to setAttribute for board UI"..field.." on id "..id.." to "..tostring(value))
+    end
+  end
 end
+
+--[[ ******************************
+Wrapper function for global UI attributes.
+Saves attribute update to be replayed on restore.
+*********************************]]
+function UI_setAttribute(id, field, value)
+  if env.test.trace2 then log("UI_setAttribute()") end
+  assert(type(id) == "string", "UI_setAttribute(): id must be a string")
+  assert(type(field) == "string", "UI_setAttribute(): field must be a string")
+  assert(value or value==false, "UI_setAttribute(): value missing")
+  GD.states.global_UI[id.."|"..field] = value
+  UI.setAttribute(id, field, value)
+end
+
+--[[ ******************************
+Wrapper function for saving board UI attributes.
+Saves attribute update to be replayed on restore.
+*********************************]]
+function board_UI_setAttribute(id, field, value)
+	if env.test.trace2 then log("board_UI_setAttribute()") end
+	assert(type(id) == "string", "board_UI_setAttribute(): id must be a string")
+	assert(type(field) == "string", "board_UI_setAttribute(): field must be a string")
+	assert(value or value==false, "board_UI_setAttribute(): value missing")
+	GD.states.board_UI[id.."|"..field] = value
+	getObjectFromGUID(C.board_guid).UI.setAttribute(id, field, value)
+end
+
+--TODO: Bridge UI setAttribute wrapper
 
 --[[ *****************************
 Initial load setup.
@@ -69,20 +128,54 @@ function onLoadInit()
 	if env.test.trace then log("onLoadInit()") end
 	GD.game = {}
 	GD.env = {}
-	GD.state = {}
+	GD.states = {}
+	GD.states.global_UI = {}
+	GD.states.board_UI = {}
 	GD.bridges = {}
 	for _,bridge in ipairs(C.bridges) do
 		GD.bridges[bridge.guid]=bridge
 	end
   GD.cities = simpleDeepCopy(C.cities)
 	GD.game.player_order = {}
+
 	GD.env.use_suggested_placement = false
+	GD.env.verbose = true
+	GD.env.use_student_decals = true
+
 	GD.game.played_tiles = 0
 	GD.game.undo = {}
 	GD.game.stage = "init"
 	GD.game.current_player = ""
 
-	--TODO: display start game dialog
+	UI_setAttribute("opt_use_suggested_setup","isOn",GD.env.use_suggested_placement)
+	UI_setAttribute("opt_verbose","isOn",GD.env.verbose)
+	if not(env.test.hide_start_panel) then
+		UI_setAttribute("startPanel","active","true")
+	end
+end
+
+--[[ *****************************
+  UI handler for initial game setup options.
+  ********************************]]
+function handleOptionsUIBtn(player, value, id)
+  if env.test.trace then log("handleOptionsUIBtn()") end
+  local setting = (value == 'True')
+  UI_setAttribute(id, "isOn", setting)
+  if id == "opt_use_suggested_setup" then
+    GD.env.use_suggested_placement = setting
+		UI_setAttribute("opt_use_suggested_setup","isOn",setting)
+  elseif id == "opt_verbose" then
+    GD.env.verbose = setting
+		UI_setAttribute("opt_verbose","isOn",setting)
+  end
+end
+
+--[[ *****************************
+Button handler for start game dialog.
+********************************]]
+function startGameBtn(player, btn, id)
+	if env.test.trace then log("startGameBtn(): "..player.color) end
+	startGame()
 end
 
 --[[ *****************************
@@ -103,6 +196,7 @@ function startGame()
 		broadcastToAll("3 or 4 players needed to play this game.")
 		return
 	end
+	UI_setAttribute("startPanel","active","false")
 	GD.game.current_player = math.random(1,#GD.game.player_order)
 	local current = GD.game.player_order[GD.game.current_player]
 	if env.test.debug then log("Current player is "..current) end
@@ -115,13 +209,11 @@ function startGame()
 			log("ERROR: startGame(): Invalid player count")
 			return
 		end
-
-		--TODO: hide start dialog
-
 		GD.game.stage = "play"
 		for g,_ in pairs(C.tiles) do
 			getObjectFromGUID(g).interactable = true
 		end
+		broadcastToAll("Begin game with suggested initial placement")
 	else
 		GD.game.stage = "placement"
 		for g,d in pairs(C.tiles) do
@@ -129,10 +221,12 @@ function startGame()
 		end
 	end
 	setActivePlayer(false)
+	broadcastToAll("Place intial Master Tiles")
 end
 
 --[[ *****************************
-TODO: doc
+Setup the game for suggested 3 player initial tile placement.
+Includes blocking off City 3.
 ********************************]]
 function suggested3Player()
 	if env.test.trace then log("suggested3Player()") end
@@ -156,7 +250,7 @@ function suggested3Player()
 end
 
 --[[ *****************************
-TODO: doc
+Setup the game for suggested 4 player initial tile placement.
 ********************************]]
 function suggested4Player()
 	if env.test.trace then log("suggested4Player()") end
@@ -167,7 +261,7 @@ function suggested4Player()
 end
 
 --[[ *****************************
-TODO: doc
+Sets the active player.  Advance param defaults to true.
 ********************************]]
 function setActivePlayer(advance)
 	if advance == nil then advance = true end
@@ -175,7 +269,7 @@ function setActivePlayer(advance)
 	local current = GD.game.player_order[GD.game.current_player]
 	local old = current
 	if advance then
-		board.UI.setAttribute(current.."PlayerPanel", "active", "false")
+		board_UI_setAttribute(current.."PlayerPanel", "active", "false")
 		GD.game.current_player = GD.game.current_player + 1
 		if GD.game.current_player > 4 then GD.game.current_player = 1 end --wrap
 		current = GD.game.player_order[GD.game.current_player]
@@ -185,17 +279,18 @@ function setActivePlayer(advance)
 		end
 	end
 	for _,pcol in ipairs(GD.game.player_order) do
-		board.UI.setAttribute(pcol.."UndoPanel","active","false")
-		board.UI.setAttribute(pcol.."DonePanel","active",GD.game.stage=="play")
-		board.UI.setAttribute(pcol.."JourneyPanel","active",GD.game.stage=="play")
-		board.UI.setAttribute(pcol.."PlacementPanel","active",GD.game.stage=="placement")
-		board.UI.setAttribute(pcol.."PlayerPanel","active",pcol == current)
+		board_UI_setAttribute(pcol.."UndoPanel","active","false")
+		board_UI_setAttribute(pcol.."DonePanel","active",GD.game.stage=="play")
+		board_UI_setAttribute(pcol.."JourneyPanel","active",GD.game.stage=="play")
+		board_UI_setAttribute(pcol.."PlacementPanel","active",GD.game.stage=="placement")
+		board_UI_setAttribute(pcol.."PlayerPanel","active",pcol == current)
 	end
 	GD.game.undo = {}
 end
 
 --[[ *****************************
 Locate ID in the network of nearest city to dropped tile position.  Returns -1 if not found.
+TODO: consider finding nearest valid city for tile placement.  Currently only closest of any city.
 ********************************]]
 function findNearestCity(pos)
   assert(pos, "ERROR: findNearestCity(): missing parameter 'pos'")
@@ -277,12 +372,12 @@ function onObjectDrop(pcol, obj)
   local city_id = findNearestCity(obj.getPosition())
   assert(city_id > 0,"ERROR: onObjectDrop(): Could not locate nearest city")
   local city = GD.cities[city_id]
-  if contains(city.tiles, obj.getGUID()) then
+  if contains(city.tiles, obj.getGUID()) then							--TODO: city tiles
     if env.test.debug then log("ignoring tile drop in same city") end
   else
 		if GD.game.stage == "play" then
 	    local count = 0
-	    for _,tg in pairs(city.tiles) do
+	    for _,tg in pairs(city.tiles) do 						--TODO: city tiles
 	      local tile = C.tiles[tg]
 	      if tile.t == type and tile.c ~= color then
 	        if env.test.debug then log("another player already played a "..obj.getName().." here") end
@@ -306,10 +401,11 @@ function onObjectDrop(pcol, obj)
 				return
 	    end
 	    if env.test.debug then log("valid student for "..obj.getName()) end
+			if GD.env.use_student_decals then addDecal(obj.getGUID()) end
 		elseif GD.game.stage == "placement" then
 			-- no more than 3 tiles per city total (2 for 3 player)
 			local pnum = #GD.game.player_order
-			if (pnum == 3 and #city.tiles >= 2) or (pnum == 4 and #city.tiles >= 3) then
+			if (pnum == 3 and #city.tiles >= 2) or (pnum == 4 and #city.tiles >= 3) then 						--TODO: city tiles
 				if env.test.debug then log("Maximum masters placed in city "..tostring(city.id)) end
 				obj.setVelocity(Vector(0,0,0))
 				obj.setPosition(snap_back)
@@ -318,7 +414,7 @@ function onObjectDrop(pcol, obj)
 			-- cannot play same master as another color
 			-- no more than 2 tiles of a color in city (1 for 3 player)
 			local count = 0
-	    for _,tg in pairs(city.tiles) do
+	    for _,tg in pairs(city.tiles) do 				--TODO: city tiles
 	      local tile = C.tiles[tg]
 				if tile.t == type and tile.c ~= color then
 					if env.test.debug then log("Another player already played a "..obj.getName().." here") end
@@ -347,14 +443,14 @@ function onObjectDrop(pcol, obj)
 	GD.game.played_tiles = GD.game.played_tiles + 1
 	if GD.game.stage == "placement" then
 		local board = getObjectFromGUID(C.board_guid)
-		board.UI.setAttribute(pcol.."UndoPanel","active","true")
-		board.UI.setAttribute(pcol.."DonePanel","active","true")
-		board.UI.setAttribute(pcol.."PlacementPanel","active","false")
+		board_UI_setAttribute(pcol.."UndoPanel","active","true")
+		board_UI_setAttribute(pcol.."DonePanel","active","true")
+		board_UI_setAttribute(pcol.."PlacementPanel","active","false")
 	else
 	  updateScores()
 		local board = getObjectFromGUID(C.board_guid)
-		board.UI.setAttribute(pcol.."JourneyPanel","active","false")
-		board.UI.setAttribute(pcol.."UndoPanel","active","true")
+		board_UI_setAttribute(pcol.."JourneyPanel","active","false")
+		board_UI_setAttribute(pcol.."UndoPanel","active","true")
 	end
 end
 
@@ -379,12 +475,15 @@ function locateTile(tile, city_id)
   end
 	tile.setVelocity(Vector(0,0,0))
   tile.setPosition(Vector(cpos.x + dx, 2, cpos.z + dz))
-	table.insert(GD.cities[city_id].tiles, tile.getGUID())
+	table.insert(GD.cities[city_id].tiles, tile.getGUID()) 				--TODO: city tiles
+	local board = getObjectFromGUID(C.board_guid)
+	board_UI_setAttribute("cityText_"..tostring(city_id),"text",tostring(#GD.cities[city_id].tiles)) 					--TODO: city tiles
   Wait.condition(function() tile.setLock(true) end, function() return tile.isDestroyed() or tile.resting end, 5)
 end
 
 --[[ *****************************
 Update player scores for masters in cities.
+TODO: implement UI for this
 ********************************]]
 function updateScores()
   if env.test.trace then log("updateScores()") end
@@ -397,7 +496,7 @@ function updateScores()
 		for _,city in ipairs(GD.cities) do
 			local city_has_master = false
 			local masters = {}
-			for _,g in ipairs(city.tiles) do
+			for _,g in ipairs(city.tiles) do						--TODO: city tiles
 				if C.tiles[g].c == pcol then
 					if not(city_has_master) then score.cities = score.cities + 1 end
 					city_has_master = true
@@ -412,6 +511,7 @@ end
 
 --[[ *****************************
 Process any undo actions.
+TODO: undo a student journey
 ********************************]]
 function undo(pcol)
   if env.test.trace then log("undo(): "..pcol) end
@@ -425,9 +525,10 @@ function undo(pcol)
       tile.setVelocity(Vector(0,0,0))
       tile.setPosition(snap_back)
 			for _,city in ipairs(GD.cities) do
-				local i = indexOf(city.tiles, tile.getGUID())
+				local i = indexOf(city.tiles, tile.getGUID())						--TODO: city tiles
 				if i>0 then table.remove(city.tiles,i) end
 			end
+			clearDecal(tile.getGUID())
     elseif undo.action == "start-journey" then
 			--undo start Journey, not the
 			disableBridgeButtons()
@@ -443,21 +544,24 @@ function undo(pcol)
 		GD.game.played_tiles = GD.game.played_tiles - 1
 	end
 	local board = getObjectFromGUID(C.board_guid)
-	board.UI.setAttribute(pcol.."UndoPanel","active","false")
-	board.UI.setAttribute(pcol.."JourneyPanel","active",GD.game.stage=="play")
-	board.UI.setAttribute(pcol.."PlacementPanel","active",GD.game.stage=="placement")
-	board.UI.setAttribute(pcol.."DonePanel","active",GD.game.stage=="play")
+	board_UI_setAttribute(pcol.."UndoPanel","active","false")
+	board_UI_setAttribute(pcol.."JourneyPanel","active",GD.game.stage=="play")
+	board_UI_setAttribute(pcol.."PlacementPanel","active",GD.game.stage=="placement")
+	board_UI_setAttribute(pcol.."DonePanel","active",GD.game.stage=="play")
 end
 
 --[[ *****************************
-TODO: doc
+Process a student journey.
+Called from a bridge when player clicks on an arrow.
+params:
+
 ********************************]]
 function studentJourney(params)
 	if env.test.trace then log("studentJourney()") end
 	if env.test.debug then log(params) end
 	bridge = GD.bridges[params.guid]
-	--The "downArrow" is moving from smaller number city to bigger.  "upArrow" is moving from bigger to smaller.
-	if params.id == "downArrow" then
+	--"upArrow" is moving from smaller number city to bigger.  "downArrow" is moving from bigger to smaller.
+	if params.id == "upArrow" then
 		if env.test.debug then log("Students move from city "..tostring(bridge.cities[1]).." to city "..tostring(bridge.cities[2])) end
 	else
 		if env.test.debug then log("Students move from city "..tostring(bridge.cities[2]).." to city "..tostring(bridge.cities[1])) end
@@ -468,35 +572,104 @@ function studentJourney(params)
 
 	--TODO: this moves to journey confirmation dialog?
 	local board = getObjectFromGUID(C.board_guid)
-	board.UI.setAttribute(params.pcol.."DonePanel","active","true")
+	board_UI_setAttribute(params.pcol.."DonePanel","active","true")
 
 end
 
 --[[ *****************************
-TODO: doc
+Return true if city tile list contains at least one student for player color
 ********************************]]
-function enableBridgeButtons()
-	--TODO: make this smart, only enable valid buttons per journey limitations in rules
-	--The "downArrow" is moving from smaller number city to bigger.  "upArrow" is moving from bigger to smaller.
-	--Only enable arrows where player has at least one student in beginning city (city moved from)
-	for g,_ in pairs(GD.bridges) do
-		local b = getObjectFromGUID(g)
-		b.UI.setAttribute("mainPanel", "active", "true")
+function hasStudent(tiles, pcol)
+	local tmp = {}
+	for _,g in ipairs(tiles) do
+		if C.tiles[g].c == pcol then
+			if tmp[C.tiles[g].t] then
+				return true
+			else
+				tmp[C.tiles[g].t] = true
+			end
+		end
 	end
 end
 
 --[[ *****************************
-TODO: doc
+Enable valid buttons according to student journey limitations in rules
+The "downArrow" is moving from smaller number city to bigger.  "upArrow" is moving from bigger to smaller.
+Only enable arrows where player has at least one student in source city (city moved from)
+********************************]]
+function enableBridgeButtons(pcol)
+	if env.test.trace then log("enableBridgeButtons(): "..pcol) end
+	--First disable all arrows and UI panels
+	for g,bd in pairs(GD.bridges) do
+		if bd.intact then
+			local b = getObjectFromGUID(g)
+			b.UI.setAttribute("upPanel", "active", "false")
+			b.UI.setAttribute("downPanel", "active", "false")
+			b.UI.setAttribute("mainPanel", "active", "false")
+		end
+	end
+	--Search all city -> neighbor paths and enable arrows if at least one source student for player
+	for _,city in ipairs(GD.cities) do
+		if hasStudent(city.tiles, pcol) then					--TODO: city tiles
+			--enable all neighbor paths
+			for _,neighbor in ipairs(city.neighbors) do
+				local bridge = getObjectFromGUID(C.bridges[neighbor.bridge].guid)
+				if bridge then
+					if neighbor.id > city.id then
+						--up arrow
+						bridge.UI.setAttribute("upPanel","active","true")
+					else
+						--down arrow
+						bridge.UI.setAttribute("downPanel","active","true")
+					end
+					bridge.UI.setAttribute("mainPanel","active","true")
+				end
+			end
+		end
+	end
+end
+
+--[[ *****************************
+Disable the arrow buttons on all bridges.
 ********************************]]
 function disableBridgeButtons()
-	for g,_ in pairs(GD.bridges) do
-		local b = getObjectFromGUID(g)
-		b.UI.setAttribute("mainPanel", "active", "false")
+	for g,bd in pairs(GD.bridges) do
+		if bd.intact then
+			local b = getObjectFromGUID(g)
+			b.UI.setAttribute("mainPanel", "active", "false")
+		end
 	end
 end
 
 --[[ *****************************
-TODO: doc
+Add a thick cyan border to a tile, hovering just above it.
+Used to indicate a tile is a student.
+********************************]]
+function addDecal(tile_guid)
+	local params = {
+    name = "thick-cyan-box",
+    position = {["x"]=0,["y"]=0.25,["z"]=0},
+    rotation = {["x"]=90,["y"]=180,["z"]=0},
+		scale = {["x"]=2,["y"]=2,["z"]=1},
+    url = C.student_border_url
+  }
+	local tile = getObjectFromGUID(tile_guid)
+	assert(tile,"ERROR: addDecal(): No object for guid "..tostring(tile_guid))
+	tile.addDecal(params)
+end
+
+--[[ *****************************
+Clear the cyan border from a tile.
+********************************]]
+function clearDecal(tile_guid)
+	local tile = getObjectFromGUID(tile_guid)
+	assert(tile,"ERROR: addDecal(): No object for guid "..tostring(tile_guid))
+	tile.setDecals({})
+end
+
+
+--[[ *****************************
+Handler for UI button clicks
 ********************************]]
 function buttonClick(player, btn, id)
 	if env.test.trace then log("buttonClick(): Player: "..player.color..", id: "..id) end
@@ -520,13 +693,13 @@ function buttonClick(player, btn, id)
 	elseif action == "undo" then
 		undo(player.color)
 	elseif action == "journey" then
-		enableBridgeButtons()
-		board.UI.setAttribute(pcol.."JourneyPanel","active","false")
-		board.UI.setAttribute(pcol.."UndoPanel","active","true")
-		board.UI.setAttribute(pcol.."DonePanel","active","false")
+		enableBridgeButtons(pcol)
+		board_UI_setAttribute(pcol.."JourneyPanel","active","false")
+		board_UI_setAttribute(pcol.."UndoPanel","active","true")
+		board_UI_setAttribute(pcol.."DonePanel","active","false")
 		table.insert(GD.game.undo, {action = "start-journey"})
 	elseif action == "placement" then
-		--ignore
+		--ignore TODO: remove this since not a button anymore?
 	else
 		log("ERROR: buttonClick(): No recognized action.")
 		return

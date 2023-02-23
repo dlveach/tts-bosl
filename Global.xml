@@ -1,0 +1,152 @@
+<XmlLayout xmlns="XmlLayout"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="XmlLayout Configuration/XmlLayout.xsd">
+
+<Defaults>
+
+  <Button hoverClass="hover"
+          pressClass="press"
+          selectClass="select"
+          color="blue"
+          textColor="white"
+          fontSize="14"
+          font="Arial"
+          image="Sprites/Layout/Button"
+          textShadow="rgba(0,0,0,0.6)" />
+
+  <Button class="hover"
+          color="cyan"
+          textColor="white"
+          textShadow="rgba(0,0,0,1)"/>
+
+  <Button class="press"
+          color="blue"
+          textColor="white" />
+
+  <Button class="select"
+          color="blue"
+          textColor="white"
+          textShadow="rgba(0,0,0,1)" />
+
+  <Toggle class="Options"
+        onValueChanged="handleOptionsUIBtn"
+        colors="blue|cyan|cyan|grey)"
+        textColor="grey" />
+
+  <Row class="TitleRow"
+        preferredHeight="25"
+        dontUseTableRowBackground="true"
+        color="rgba(0,0,0,0)"/>
+
+  <Row class="tableRow"
+        preferredHeight="25"
+        dontUseTableRowBackground="true"
+        color="rgba(0,0,0,1)"/>
+
+  <Row class="EndGameTitle"
+        preferredHeight="60"
+        dontUseTableRowBackground="true"
+        color="rgba(0,0,0,0)"/>
+
+  <Row class="EndGameHeader"
+        preferredHeight="40"
+        dontUseTableRowBackground="true"
+        color="rgba(0,0,0,0)"/>
+
+  <Row class="EndGameStats"
+        preferredHeight="40"
+        dontUseTableRowBackground="true"
+        color="rgba(0,0,0,0)"/>
+
+  <Cell class="EndGameTitle"
+        dontUseTableCellBackground="true"
+        color="rgba(0,0,0,0)"
+        image="Sprites/Layout/Title"  />
+
+  <Cell class="TitleCell"
+        dontUseTableCellBackground="true"
+        color="rgba(0,0,0,1)"
+        image="Sprites/Layout/Title"  />
+
+  <Cell class="HeaderCell"
+        dontUseTableCellBackground="true"
+        color="rgba(0,0,0,1)"
+        padding="0 0 0 0"/>
+
+  <Cell class="StatsCell"
+        dontUseTableCellBackground="true"
+        color="rgba(0.1,0.1,0.1,1)"
+        image="Sprites/Layout/Button"
+        padding="0 0 0 0"/>
+
+  <Image class="TipImage"
+        preserveAspect="true"
+        tooltipPosition="Above" />
+
+  <Text class="small"
+        fontSize="12"
+        color="white"/>
+  <Text class="medium"
+        fontSize="14"
+        color="white"/>
+  <Text class="med_large"
+        fontSize="18"
+        color="white"/>
+  <Text class="large"
+        fontSize="20"
+        color="white" />
+
+  <Panel class="StartPanel"
+        height="440"
+        width="460"
+        allowDragging="true"
+        returnToOriginalPositionWhenReleased="false"
+        rectAlignment="Center"
+        offsetXY="0 0"
+        color="#003699"
+        image="Sprites/Layout/Base"/>
+
+  <VerticalLayout class="StartPanel"
+        height="380"
+        width="420"
+        color="#00091a"
+        image="Sprites/Layout/Base"
+        childAlignment="MiddleCenter"
+        spacing="0"/>
+
+  <Panel class="EndGamePanel"
+        active="true"
+        allowDragging="false"
+        returnToOriginalPositionWhenReleased="false"
+        color="#003699"
+        image="Sprites/Layout/Base"
+        rectAlignment="Center"
+        width="840"
+        height="640"
+        offsetXY="0 200"/>
+
+</Defaults>
+
+<Panel id="startPanel" class="StartPanel" active="false">
+  <VerticalLayout class="StartPanel">
+    <Panel padding="0 0 10 10">
+      <Text class="large" color="grey" text="After all players are seated:"/>
+    </Panel>
+    <Panel padding="150 150 0 0">
+      <Button id="startButton" onClick="startGameBtn"
+        fontSize="20" text="Start"/>
+    </Panel>
+    <Panel padding="0 0 40 0">
+      <Text class="medium" color="grey" text="Game options:"/>
+    </Panel>
+    <Panel padding="100 100 0 60">
+      <VerticalLayout allowDragging="false"
+        spacing="1" rectAlignment="Center" offsetXY="0 0">
+        <Toggle class="Options" id="opt_use_suggested_setup" text="  Use suggested placement"/>
+        <Toggle class="Options" id="opt_verbose" text="  Verbose game messages"/>
+      </VerticalLayout>
+    </Panel>
+  </VerticalLayout>
+</Panel>
+
+</XmlLayout>

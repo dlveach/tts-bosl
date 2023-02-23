@@ -5,6 +5,9 @@ C.trash_guid = "f965d4"
 
 C.player_colors = {"Purple", "Blue", "Red", "Yellow"}
 
+-- C.student_border_url = "http://cloud-3.steamusercontent.com/ugc/1548633241853440272/CE7B48E333CB899D23B7CA094820DC08D4411392/"
+C.student_border_url = "http://cloud-3.steamusercontent.com/ugc/2000198497751758094/4EED38B96B8D89EFCA4DD78397F265C1D7CAA8CD/"
+
 C.markers = {
   ["2f93af"]={p={x=-23.2136783599854, y=1.0550822019577, z=7.42621421813965},},
   ["fb860c"]={p={x=-21.7794094085693, y=1.0550822019577, z=7.47151470184326},},
@@ -21,29 +24,29 @@ C.markers = {
 C.last_marker = "e2fe94"
 
 C.bridges = { --TODO: refactor this and get rid of loop in onLoadInit()
-  { id = 1, guid="11e11f", intact = true, cities = {1,2}, },
-  { id = 2, guid="dd4e5d", intact = true, cities = {2,3}, },
-  { id = 3, guid="109ebe", intact = true, cities = {1,9}, },
-  { id = 4, guid="a70ed2", intact = true, cities = {1,6}, },
-  { id = 5, guid="6e5ce7", intact = true, cities = {1,4}, },
-  { id = 6, guid="9076e9", intact = true, cities = {4,5}, },
-  { id = 7, guid="62940a", intact = true, cities = {2,5}, },
-  { id = 8, guid="48a0bc", intact = true, cities = {3,5}, },
-  { id = 9, guid="886d67", intact = true, cities = {3,8}, },
-  { id = 10, guid="d9170a", intact = true, cities = {4,6}, },
-  { id = 11, guid="d62a06", intact = true, cities = {4,10}, },
-  { id = 12, guid="f40e98", intact = true, cities = {7,8}, },
-  { id = 13, guid="b83b1f", intact = true, cities = {6,9}, },
-  { id = 14, guid="7ec9e7", intact = true, cities = {6,12}, },
-  { id = 15, guid="ffbcbb", intact = true, cities = {7,10}, },
-  { id = 16, guid="50610d", intact = true, cities = {7,11}, },
-  { id = 17, guid="f7e494", intact = true, cities = {8,11}, },
-  { id = 18, guid="7738ea", intact = true, cities = {10,12}, },
-  { id = 19, guid="edca0a", intact = true, cities = {10,13}, },
-  { id = 20, guid="985b39", intact = true, cities = {9,12}, },
-  { id = 21, guid="3b7d28", intact = true, cities = {12,13}, },
-  { id = 22, guid="cb5fb2", intact = true, cities = {11,13}, },
-  { id = 23, guid="616863", intact = true, cities = {5,7}, },
+  { id = 1, guid="b8a068", intact = true, cities = {1,2}, },
+  { id = 2, guid="3a3599", intact = true, cities = {2,3}, },
+  { id = 3, guid="065ffa", intact = true, cities = {1,9}, },
+  { id = 4, guid="d0757c", intact = true, cities = {1,6}, },
+  { id = 5, guid="b3dc1b", intact = true, cities = {1,4}, },
+  { id = 6, guid="b8b750", intact = true, cities = {4,5}, },
+  { id = 7, guid="3f7b2b", intact = true, cities = {2,5}, },
+  { id = 8, guid="f8d173", intact = true, cities = {3,5}, },
+  { id = 9, guid="adf348", intact = true, cities = {3,8}, },
+  { id = 10, guid="c7145c", intact = true, cities = {4,6}, },
+  { id = 11, guid="2a8512", intact = true, cities = {4,10}, },
+  { id = 12, guid="97a3e1", intact = true, cities = {7,8}, },
+  { id = 13, guid="6c1486", intact = true, cities = {6,9}, },
+  { id = 14, guid="51e247", intact = true, cities = {6,12}, },
+  { id = 15, guid="5cb45a", intact = true, cities = {7,10}, },
+  { id = 16, guid="8fba5c", intact = true, cities = {7,11}, },
+  { id = 17, guid="7d2fd7", intact = true, cities = {8,11}, },
+  { id = 18, guid="fa6e9c", intact = true, cities = {10,12}, },
+  { id = 19, guid="5f2c80", intact = true, cities = {10,13}, },
+  { id = 20, guid="66b091", intact = true, cities = {9,12}, },
+  { id = 21, guid="9f6777", intact = true, cities = {12,13}, },
+  { id = 22, guid="e2a8df", intact = true, cities = {11,13}, },
+  { id = 23, guid="6f0fee", intact = true, cities = {5,7}, },
 }
 
 C.cities = {

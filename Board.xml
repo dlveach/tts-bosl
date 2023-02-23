@@ -1,3 +1,7 @@
+<XmlLayout xmlns="XmlLayout"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="XmlLayout Configuration/XmlLayout.xsd">
+
 <Defaults>
 
   <Row  dontUseTableRowBackground="true" />
@@ -38,6 +42,21 @@
          color="rgba(0,0,0,0)"
          width="260" height="50"
          />
+
+  <Panel class="cityPanel"
+         active="true"
+         rotation="180 180 0"
+         scale="0.15 0.15"
+         color="rgba(0,0,0,1)"
+         width="45" height="40"
+         />
+
+  <Text class="cityText"
+        color="rgb(1,1,0)"
+        textShadow="rgba(0,0,0,0.6)"
+        font="Arial"
+        fontSize="32"
+        />
 
 </Defaults>
 
@@ -140,3 +159,45 @@
     </Row>
   </TableLayout>
 </Panel>
+
+<Panel class="cityPanel" id="cityPanel_1" position="49 -69 -15" >
+  <Text class="cityText" id="cityText_1" text="0"/>
+</Panel>
+<Panel class="cityPanel" id="cityPanel_2" position="5 -70 -15" >
+  <Text class="cityText" id="cityText_2" text="0"/>
+</Panel>
+<Panel class="cityPanel" id="cityPanel_3" position="-53 -64 -15" >
+  <Text class="cityText" id="cityText_3" text="0"/>
+</Panel>
+<Panel class="cityPanel" id="cityPanel_4" position="27 -32 -15" >
+  <Text class="cityText" id="cityText_4" text="0"/>
+</Panel>
+<Panel class="cityPanel" id="cityPanel_5" position="-25 -36 -15" >
+  <Text class="cityText" id="cityText_5" text="0"/>
+</Panel>
+<Panel class="cityPanel" id="cityPanel_6" position="65 -4 -15" >
+  <Text class="cityText" id="cityText_6" text="0"/>
+</Panel>
+<Panel class="cityPanel" id="cityPanel_7" position="-20 2 -15" >
+  <Text class="cityText" id="cityText_7" text="0"/>
+</Panel>
+<Panel class="cityPanel" id="cityPanel_8" position="-92 4 -15" >
+  <Text class="cityText" id="cityText_8" text="0"/>
+</Panel>
+<Panel class="cityPanel" id="cityPanel_9" position="80 51 -15" >
+  <Text class="cityText" id="cityText_9" text="0"/>
+</Panel>
+<Panel class="cityPanel" id="cityPanel_10" position="20 30 -15" >
+  <Text class="cityText" id="cityText_10" text="0"/>
+</Panel>
+<Panel class="cityPanel" id="cityPanel_11" position="-47 41 -15" >
+  <Text class="cityText" id="cityText_11" text="0"/>
+</Panel>
+<Panel class="cityPanel" id="cityPanel_12" position="36 78 -15" >
+  <Text class="cityText" id="cityText_12" text="0"/>
+</Panel>
+<Panel class="cityPanel" id="cityPanel_13" position="-24 76 -15" >
+  <Text class="cityText" id="cityText_13" text="0"/>
+</Panel>
+
+</XmlLayout>
