@@ -372,12 +372,12 @@ function onObjectDrop(pcol, obj)
   local city_id = findNearestCity(obj.getPosition())
   assert(city_id > 0,"ERROR: onObjectDrop(): Could not locate nearest city")
   local city = GD.cities[city_id]
-  if contains(city.tiles, obj.getGUID()) then							--TODO: city tiles
+	if city.tiles[obj.getGUID()] ~= nil then
     if env.test.debug then log("ignoring tile drop in same city") end
   else
 		if GD.game.stage == "play" then
 	    local count = 0
-	    for _,tg in pairs(city.tiles) do 						--TODO: city tiles
+			for tg,_ in pairs(city.tiles) do
 	      local tile = C.tiles[tg]
 	      if tile.t == type and tile.c ~= color then
 	        if env.test.debug then log("another player already played a "..obj.getName().." here") end
@@ -405,7 +405,7 @@ function onObjectDrop(pcol, obj)
 		elseif GD.game.stage == "placement" then
 			-- no more than 3 tiles per city total (2 for 3 player)
 			local pnum = #GD.game.player_order
-			if (pnum == 3 and #city.tiles >= 2) or (pnum == 4 and #city.tiles >= 3) then 						--TODO: city tiles
+			if (pnum == 3 and sizeOf(city.tiles) >= 2) or (pnum == 4 and sizeOf(city.tiles) >= 3) then
 				if env.test.debug then log("Maximum masters placed in city "..tostring(city.id)) end
 				obj.setVelocity(Vector(0,0,0))
 				obj.setPosition(snap_back)
@@ -414,7 +414,7 @@ function onObjectDrop(pcol, obj)
 			-- cannot play same master as another color
 			-- no more than 2 tiles of a color in city (1 for 3 player)
 			local count = 0
-	    for _,tg in pairs(city.tiles) do 				--TODO: city tiles
+			for tg,_ in pairs(city.tiles) do
 	      local tile = C.tiles[tg]
 				if tile.t == type and tile.c ~= color then
 					if env.test.debug then log("Another player already played a "..obj.getName().." here") end
@@ -461,6 +461,7 @@ function locateTile(tile, city_id)
 	if env.test.trace then log("locateTile()") end
 	local cpos = GD.cities[city_id].pos
 	local type = C.tiles[tile.getGUID()].t
+	local color = C.tiles[tile.getGUID()].c
   local dx, dz
   if type == "Rain" then dx,dz = -0.5,1
   elseif type == "Astro" then dx,dz = 0.5,1
@@ -475,9 +476,16 @@ function locateTile(tile, city_id)
   end
 	tile.setVelocity(Vector(0,0,0))
   tile.setPosition(Vector(cpos.x + dx, 2, cpos.z + dz))
-	table.insert(GD.cities[city_id].tiles, tile.getGUID()) 				--TODO: city tiles
+	local rank = "master"
+	for _,td in pairs(GD.cities[city_id].tiles) do
+		if td.t == type and td.c == color then
+			rank = "student"
+			break
+		end
+	end
+	GD.cities[city_id].tiles[tile.getGUID()] = {t=type, c=color, r=rank}
 	local board = getObjectFromGUID(C.board_guid)
-	board_UI_setAttribute("cityText_"..tostring(city_id),"text",tostring(#GD.cities[city_id].tiles)) 					--TODO: city tiles
+	board_UI_setAttribute("cityText_"..tostring(city_id),"text",tostring(sizeOf(GD.cities[city_id].tiles)))
   Wait.condition(function() tile.setLock(true) end, function() return tile.isDestroyed() or tile.resting end, 5)
 end
 
@@ -494,16 +502,21 @@ function updateScores()
 	end
 	for pcol,score in pairs(GD.game.scores) do
 		for _,city in ipairs(GD.cities) do
-			local city_has_master = false
-			local masters = {}
-			for _,g in ipairs(city.tiles) do						--TODO: city tiles
-				if C.tiles[g].c == pcol then
-					if not(city_has_master) then score.cities = score.cities + 1 end
-					city_has_master = true
-					if not(contains(masters, C.tiles[g].t)) then table.insert(masters, C.tiles[g].t) end --skip students
+			local found_master = false
+			-- local masters = {}
+			local masters = 0
+			for g,td in ipairs(city.tiles) do
+				if td.c == pcol then
+					if td.r == "master" then
+						if not(found_master) then
+							score.cities = score.cities + 1
+							found_master = true
+						end
+						masters = masters + 1
+					end
 				end
 			end
-			score.masters = score.masters + #masters
+			score.masters = score.masters + masters
 		end
 	end
 	if env.test.debug then log(GD.game.scores) end
@@ -525,8 +538,7 @@ function undo(pcol)
       tile.setVelocity(Vector(0,0,0))
       tile.setPosition(snap_back)
 			for _,city in ipairs(GD.cities) do
-				local i = indexOf(city.tiles, tile.getGUID())						--TODO: city tiles
-				if i>0 then table.remove(city.tiles,i) end
+				if city.tiles[tile.getGUID()] != nil then city.tiles[tile.getGUID()] = nil end
 			end
 			clearDecal(tile.getGUID())
     elseif undo.action == "start-journey" then
@@ -554,7 +566,9 @@ end
 Process a student journey.
 Called from a bridge when player clicks on an arrow.
 params:
-
+	guid:	bridge GUID
+	pcol:	player.color
+	id:		arrow button id ("upArrow" or "downArrow")
 ********************************]]
 function studentJourney(params)
 	if env.test.trace then log("studentJourney()") end
@@ -580,16 +594,10 @@ end
 Return true if city tile list contains at least one student for player color
 ********************************]]
 function hasStudent(tiles, pcol)
-	local tmp = {}
-	for _,g in ipairs(tiles) do
-		if C.tiles[g].c == pcol then
-			if tmp[C.tiles[g].t] then
-				return true
-			else
-				tmp[C.tiles[g].t] = true
-			end
-		end
+	for _,td in pairs(tiles) do
+		if td.c == pcol and td.r == "student" then return true end
 	end
+	return false
 end
 
 --[[ *****************************
@@ -610,7 +618,7 @@ function enableBridgeButtons(pcol)
 	end
 	--Search all city -> neighbor paths and enable arrows if at least one source student for player
 	for _,city in ipairs(GD.cities) do
-		if hasStudent(city.tiles, pcol) then					--TODO: city tiles
+		if hasStudent(city.tiles, pcol) then
 			--enable all neighbor paths
 			for _,neighbor in ipairs(city.neighbors) do
 				local bridge = getObjectFromGUID(C.bridges[neighbor.bridge].guid)
