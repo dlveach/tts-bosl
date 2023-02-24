@@ -2,7 +2,7 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="XmlLayout Configuration/XmlLayout.xsd">
 
-<Defaults>
+<Defaults>   <!-- BoSL defaults -->
 
   <Button hoverClass="hover"
           pressClass="press"
@@ -33,69 +33,6 @@
         colors="blue|cyan|cyan|grey)"
         textColor="grey" />
 
-  <Row class="TitleRow"
-        preferredHeight="25"
-        dontUseTableRowBackground="true"
-        color="rgba(0,0,0,0)"/>
-
-  <Row class="tableRow"
-        preferredHeight="25"
-        dontUseTableRowBackground="true"
-        color="rgba(0,0,0,1)"/>
-
-  <Row class="EndGameTitle"
-        preferredHeight="60"
-        dontUseTableRowBackground="true"
-        color="rgba(0,0,0,0)"/>
-
-  <Row class="EndGameHeader"
-        preferredHeight="40"
-        dontUseTableRowBackground="true"
-        color="rgba(0,0,0,0)"/>
-
-  <Row class="EndGameStats"
-        preferredHeight="40"
-        dontUseTableRowBackground="true"
-        color="rgba(0,0,0,0)"/>
-
-  <Cell class="EndGameTitle"
-        dontUseTableCellBackground="true"
-        color="rgba(0,0,0,0)"
-        image="Sprites/Layout/Title"  />
-
-  <Cell class="TitleCell"
-        dontUseTableCellBackground="true"
-        color="rgba(0,0,0,1)"
-        image="Sprites/Layout/Title"  />
-
-  <Cell class="HeaderCell"
-        dontUseTableCellBackground="true"
-        color="rgba(0,0,0,1)"
-        padding="0 0 0 0"/>
-
-  <Cell class="StatsCell"
-        dontUseTableCellBackground="true"
-        color="rgba(0.1,0.1,0.1,1)"
-        image="Sprites/Layout/Button"
-        padding="0 0 0 0"/>
-
-  <Image class="TipImage"
-        preserveAspect="true"
-        tooltipPosition="Above" />
-
-  <Text class="small"
-        fontSize="12"
-        color="white"/>
-  <Text class="medium"
-        fontSize="14"
-        color="white"/>
-  <Text class="med_large"
-        fontSize="18"
-        color="white"/>
-  <Text class="large"
-        fontSize="20"
-        color="white" />
-
   <Panel class="StartPanel"
         height="440"
         width="460"
@@ -114,16 +51,81 @@
         childAlignment="MiddleCenter"
         spacing="0"/>
 
-  <Panel class="EndGamePanel"
+  <Panel class="StatusPanel"
         active="true"
-        allowDragging="false"
+        allowDragging="true"
         returnToOriginalPositionWhenReleased="false"
         color="#003699"
         image="Sprites/Layout/Base"
         rectAlignment="Center"
-        width="840"
-        height="640"
-        offsetXY="0 200"/>
+        offsetXY="-800 350" />
+
+  <TableLayout class="StatusTable"
+        autoCalculateHeight="true"
+        useGlobalCellPadding="false"
+        padding="0 0 0 0"
+        color="rgba(0,0,0,0)" />
+
+  <Row class="StatusTitle"
+        preferredHeight="40"
+        dontUseTableRowBackground="true"
+        color="rgba(0,0,0,0)"  />
+
+  <Row class="StatusHeader"
+        preferredHeight="40"
+        dontUseTableRowBackground="true"
+        color="rgba(0,0,0,0)"  />
+
+  <Row class="StatusInfo"
+        preferredHeight="40"
+        dontUseTableRowBackground="true"
+        color="rgba(0,0,0,0)"  />
+
+  <Cell class="StatusTitle"
+        dontUseTableCellBackground="true"
+        color="rgba(0,0,0,0)"
+        image="Sprites/Layout/Title"  />
+
+  <Cell class="StatusHeader"
+        dontUseTableCellBackground="true"
+        color="rgba(0,0,0,1)"
+        padding="0 0 0 0"/>
+
+  <Cell class="StatusInfo"
+        dontUseTableCellBackground="true"
+        color="rgba(0.1,0.1,0.1,1)"
+        image="Sprites/Layout/Button"
+        padding="0 0 0 0"  />
+
+  <Text class="StatusTitle"
+        fontSize="20"
+        color="grey"  />
+
+  <Text class="StatusHeader"
+        color="Grey"
+        fontSize="16"  />
+
+  <Text class="StatusLabel"
+        color="Grey"
+        alignment="MiddleRight"
+        fontSize="16"  />
+
+  <Text class="StatusInfo"
+        color="White"
+        fontSize="18"  />
+
+  <Text class="small"
+        fontSize="12"
+        color="white"/>
+  <Text class="medium"
+        fontSize="14"
+        color="white"/>
+  <Text class="med_large"
+        fontSize="18"
+        color="white"/>
+  <Text class="large"
+        fontSize="20"
+        color="white" />
 
 </Defaults>
 
@@ -148,5 +150,90 @@
     </Panel>
   </VerticalLayout>
 </Panel>
+
+<Panel id="statusPanel" class="StatusPanel" width="320" height="370" active="false">
+  <Panel width="300" height="350" color="#000910a" image="Sprites/Layout/Base">
+    <TableLayout id="statusTable" columnWidths="0 100 100">
+      <Row class="StatusTitle">
+        <Cell class="StatusTitle" columnSpan="3">
+          <Text id="statusTitle" class="StatusTitle" text="Start Game" />
+        </Cell>
+      </Row>
+      <Row class="StatusInfo">
+        <Cell class="StatusTitle">
+          <Text class="StatusLabel" text="Player:  "/>
+        </Cell>
+        <Cell class="StatusTitle" columnSpan="2">
+          <Text id="statusActivePlayer" class="StatusInfo" text="  -----" alignment="MiddleLeft"/>
+        </Cell>
+      </Row>
+      <Row class="StatusInfo">
+        <Cell class="StatusTitle">
+          <Text class="StatusLabel" text="Action:  "/>
+        </Cell>
+        <Cell class="StatusTitle" columnSpan="2">
+          <Text id="statusActiveAction" class="StatusInfo" text="  Choose" alignment="MiddleLeft"/>
+        </Cell>
+      </Row>
+      <Row id="statusHeader" class="StatusHeader">
+        <Cell class="StatusHeader"/>
+        <Cell class="StatusHeader"><Text class="StatusHeader" text="Cities"/></Cell>
+        <Cell class="StatusHeader"><Text class="StatusHeader" text="Masters"/></Cell>
+      </Row>
+
+      <Row id="Yellow_statusRow" class="StatusInfo">
+        <Cell class="StatusInfo">
+          <Text class="StatusInfo" fontSize="20" text="Yellow" color="Yellow"/>
+        </Cell>
+        <Cell class="StatusInfo">
+          <Text id="Yellow_statusCities" class="StatusInfo" text="0"/>
+        </Cell>
+        <Cell class="StatusInfo">
+          <Text id="Yellow_statusMasters" class="StatusInfo" text="0"/>
+        </Cell>
+      </Row>
+
+      <Row id="Red_statusRow" class="StatusInfo">
+        <Cell class="StatusInfo">
+          <Text class="StatusInfo" fontSize="20" text="Red" color="Red"/>
+        </Cell>
+        <Cell class="StatusInfo">
+          <Text id="Red_statusCities" class="StatusInfo" text="0"/>
+        </Cell>
+        <Cell class="StatusInfo">
+          <Text id="Red_statusMasters" class="StatusInfo" text="0"/>
+        </Cell>
+      </Row>
+
+      <Row id="Blue_statusRow" class="StatusInfo">
+        <Cell class="StatusInfo">
+          <Text class="StatusInfo" fontSize="20" text="Blue" color="Blue"/>
+        </Cell>
+        <Cell class="StatusInfo">
+          <Text id="Blue_statusCities" class="StatusInfo" text="0"/>
+        </Cell>
+        <Cell class="StatusInfo">
+          <Text id="Blue_statusMasters" class="StatusInfo" text="0"/>
+        </Cell>
+      </Row>
+
+      <Row id="Purple_statusRow" class="StatusInfo">
+        <Cell class="StatusInfo">
+          <Text class="StatusInfo" fontSize="20" text="Purple" color="Purple"/>
+        </Cell>
+        <Cell class="StatusInfo">
+          <Text id="Purple_statusCities" class="StatusInfo" text="0"/>
+        </Cell>
+        <Cell class="StatusInfo">
+          <Text id="Purple_statusMasters" class="StatusInfo" text="0"/>
+        </Cell>
+      </Row>
+
+    </TableLayout>
+  </Panel>
+</Panel>
+
+
+
 
 </XmlLayout>

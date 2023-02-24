@@ -3,10 +3,12 @@ C = {}
 C.board_guid = "bacdd0"
 C.trash_guid = "f965d4"
 
-C.player_colors = {"Purple", "Blue", "Red", "Yellow"}
+C.player_colors = { "Yellow", "Red", "Blue", "Purple",}
 
 -- C.student_border_url = "http://cloud-3.steamusercontent.com/ugc/1548633241853440272/CE7B48E333CB899D23B7CA094820DC08D4411392/"
 C.student_border_url = "http://cloud-3.steamusercontent.com/ugc/2000198497751758094/4EED38B96B8D89EFCA4DD78397F265C1D7CAA8CD/"
+
+C.tile_types = {"Rain","Astro","Dragon","Priest","Yeti","Fire","Healer"}
 
 C.markers = {
   ["2f93af"]={p={x=-23.2136783599854, y=1.0550822019577, z=7.42621421813965},},
