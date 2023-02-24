@@ -46,9 +46,9 @@
   <Panel class="cityPanel"
          active="true"
          rotation="180 180 0"
-         scale="0.15 0.15"
+         scale="0.2 0.24"
          color="rgba(0,0,0,1)"
-         width="45" height="40"
+         width="40" height="36"
          />
 
   <Text class="cityText"
@@ -160,43 +160,43 @@
   </TableLayout>
 </Panel>
 
-<Panel class="cityPanel" id="cityPanel_1" position="49 -69 -15" >
+<Panel class="cityPanel" id="cityPanel_1" position="48.5 -69.5 -15" >
   <Text class="cityText" id="cityText_1" text="0"/>
 </Panel>
-<Panel class="cityPanel" id="cityPanel_2" position="5 -70 -15" >
+<Panel class="cityPanel" id="cityPanel_2" position="5.2 -71.4 -15" >
   <Text class="cityText" id="cityText_2" text="0"/>
 </Panel>
-<Panel class="cityPanel" id="cityPanel_3" position="-53 -64 -15" >
+<Panel class="cityPanel" id="cityPanel_3" position="-52.9 -64.5 -15" >
   <Text class="cityText" id="cityText_3" text="0"/>
 </Panel>
-<Panel class="cityPanel" id="cityPanel_4" position="27 -32 -15" >
+<Panel class="cityPanel" id="cityPanel_4" position="27 -31.8 -15" >
   <Text class="cityText" id="cityText_4" text="0"/>
 </Panel>
-<Panel class="cityPanel" id="cityPanel_5" position="-25 -36 -15" >
+<Panel class="cityPanel" id="cityPanel_5" position="-24 -36.5 -15" >
   <Text class="cityText" id="cityText_5" text="0"/>
 </Panel>
-<Panel class="cityPanel" id="cityPanel_6" position="65 -4 -15" >
+<Panel class="cityPanel" id="cityPanel_6" position="65.8 -4 -15" >
   <Text class="cityText" id="cityText_6" text="0"/>
 </Panel>
-<Panel class="cityPanel" id="cityPanel_7" position="-20 2 -15" >
+<Panel class="cityPanel" id="cityPanel_7" position="-19.2 2 -15" >
   <Text class="cityText" id="cityText_7" text="0"/>
 </Panel>
-<Panel class="cityPanel" id="cityPanel_8" position="-92 4 -15" >
+<Panel class="cityPanel" id="cityPanel_8" position="-92 4.5 -15" >
   <Text class="cityText" id="cityText_8" text="0"/>
 </Panel>
-<Panel class="cityPanel" id="cityPanel_9" position="80 51 -15" >
+<Panel class="cityPanel" id="cityPanel_9" position="80.5 50.7 -15" >
   <Text class="cityText" id="cityText_9" text="0"/>
 </Panel>
-<Panel class="cityPanel" id="cityPanel_10" position="20 30 -15" >
+<Panel class="cityPanel" id="cityPanel_10" position="20.6 29.6 -15" >
   <Text class="cityText" id="cityText_10" text="0"/>
 </Panel>
-<Panel class="cityPanel" id="cityPanel_11" position="-47 41 -15" >
+<Panel class="cityPanel" id="cityPanel_11" position="-47.3 40.3 -15" >
   <Text class="cityText" id="cityText_11" text="0"/>
 </Panel>
-<Panel class="cityPanel" id="cityPanel_12" position="36 78 -15" >
+<Panel class="cityPanel" id="cityPanel_12" position="36.2 78.5 -15" >
   <Text class="cityText" id="cityText_12" text="0"/>
 </Panel>
-<Panel class="cityPanel" id="cityPanel_13" position="-24 76 -15" >
+<Panel class="cityPanel" id="cityPanel_13" position="-24 76.3 -15" >
   <Text class="cityText" id="cityText_13" text="0"/>
 </Panel>
 

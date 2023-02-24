@@ -132,7 +132,7 @@ function onLoadInit()
 	GD.states.board_UI = {}
 	GD.bridges = {}
 	for _,bridge in ipairs(C.bridges) do
-		GD.bridges[bridge.guid]=bridge
+		GD.bridges[bridge.guid]=bridge				--HACK: should I refactor this or C.bridges ???
 	end
   GD.cities = simpleDeepCopy(C.cities)
 	GD.game.player_order = {}
@@ -498,7 +498,7 @@ end
 Locate a tile in the appropriate spot in a city
 ********************************]]
 function locateTile(tile, city_id)
-	if env.test.trace then log("locateTile()") end
+	if env.test.trace then log("locateTile() "..tostring(tile)..", city id "..tostring(city_id)) end
 	local cpos = GD.cities[city_id].pos
 	local type = C.tiles[tile.getGUID()].t
 	local color = C.tiles[tile.getGUID()].c
@@ -532,6 +532,7 @@ end
 Update strength displays for cities.
 ********************************]]
 function updateCityStrengths()
+	if env.test.trace then log("updateCityStrengths()") end
 	local board = getObjectFromGUID(C.board_guid)
 	for i=1,13 do
 		board_UI_setAttribute("cityText_"..tostring(i),"text",tostring(sizeOf(GD.cities[i].tiles)))
@@ -567,7 +568,7 @@ function updateScores()
 			score.masters = score.masters + masters
 		end
 	end
-	if env.test.debug then log(GD.game.scores) end
+	-- if env.test.debug then log(GD.game.scores) end
 	for pcol,score in pairs(GD.game.scores) do
 		UI_setAttribute(pcol.."_statusCities","text",tostring(score.cities))
 		UI_setAttribute(pcol.."_statusMasters","text",tostring(score.masters))
@@ -580,6 +581,7 @@ TODO: undo a student journey
 ********************************]]
 function undo(pcol)
   if env.test.trace then log("undo(): "..pcol) end
+	local needs_update = true
   for _,undo in ipairs(GD.game.undo) do
     if undo.action == "tile_drop" then
       local tile = getObjectFromGUID(undo.guid)
@@ -594,8 +596,85 @@ function undo(pcol)
 			end
 			clearDecal(tile.getGUID())
     elseif undo.action == "start-journey" then
-			--undo start Journey, not the
+			--undo start Journey button click
 			disableBridgeButtons()
+		elseif undo.action == "journey" then
+			GD.game.journey_completed = false
+			--return markers (if any)
+			if undo.markers ~= nil then
+				if env.test.debug then log("Undo marker placement") end
+				for _,undo_data in ipairs(undo.markers) do
+					local marker = getObjectFromGUID(undo_data.guid)
+					assert(marker,"ERROR: undo(): No obj for marker guid "..tostring(undo_data.guid))
+					marker.setPosition(C.markers[marker.getGUID()].p)
+					table.remove(GD.game.used_markers,indexOf(GD.game.used_markers, undo_data.guid))
+					--open city back up
+					GD.game.closed_cities = GD.game.closed_cities - 1
+					GD.cities[undo_data.city_id].closed = false
+				end
+			end
+			--replace bridge from trash bag
+			if undo.bridge ~= nil then
+				if env.test.debug then log("Undo trash bridge") end
+				local params = {
+					guid = undo.bridge.guid,
+					position = undo.bridge.position,
+					rotation = undo.bridge.rotation,
+					callback_function = function(obj)
+						Wait.condition(function() obj.setLock(true) end, function() return obj.resting end, 3)
+					end,
+					}
+				local trash = getObjectFromGUID(C.trash_guid)
+				trash.takeObject(params)
+				GD.bridges[undo.bridge.guid].intact = true
+			else
+				log("ERROR: undo(): No bridge data for journey undo")
+			end
+			--return students from destination to origen (if any)
+			if undo.placed_students ~= nil then
+				if env.test.debug then log("Undo students placed in destination") end
+				for _,g in ipairs(undo.placed_students) do
+					local tile = getObjectFromGUID(g)
+					locateTile(tile, undo.orig_id)
+					if GD.env.use_student_decals then addDecal(g) end
+					GD.cities[undo.dest_id].tiles[g] = nil
+				end
+			end
+			--return displaced masters to destination (if any)
+			Wait.frames(function()
+				if undo.displaced_masters ~= nil then
+					if env.test.debug then log("Undo masters displaced from destination") end
+					for _,g in ipairs(undo.displaced_masters) do
+						local tile = getObjectFromGUID(g)
+						locateTile(tile, undo.dest_id)
+					end
+				end
+			end, 30)
+			--return displaced students to destination (if any)
+			Wait.frames(function()
+				if undo.displaced_students ~= nil then
+					if env.test.debug then log("Undo students displaced from destination") end
+					for _,g in ipairs(undo.displaced_students) do
+						local tile = getObjectFromGUID(g)
+						locateTile(tile, undo.dest_id)
+						if GD.env.use_student_decals then addDecal(g) end
+					end
+				end
+			end, 60)
+			--return displaced students to origen (if any)
+			Wait.frames(function()
+				if undo.displaced_origen_students ~= nil then
+					if env.test.debug then log("Undo students displaced from origen") end
+					for _,g in ipairs(undo.displaced_origen_students) do
+						local tile = getObjectFromGUID(g)
+						locateTile(tile, undo.orig_id)
+						if GD.env.use_student_decals then addDecal(g) end
+					end
+				end
+				updateCityStrengths()
+				updateScores()
+				needs_update = false
+			end, 90)
     else
       log("ERROR: undo() Unknown action")
     end
@@ -611,8 +690,11 @@ function undo(pcol)
 	board_UI_setAttribute(pcol.."JourneyPanel","active",GD.game.stage=="play")
 	board_UI_setAttribute(pcol.."PlacementPanel","active",GD.game.stage=="placement")
 	board_UI_setAttribute(pcol.."DonePanel","active",GD.game.stage=="play")
-	updateCityStrengths()
-	updateScores()
+	if needs_update then
+		--HACK: had to duplicate the updates in last journey undo due to the delay.
+		updateCityStrengths()
+		updateScores()
+	end
 end
 
 --[[ *****************************
@@ -644,6 +726,19 @@ function studentJourney(params)
 	end
 	if env.test.debug then log("across bridge id "..tostring(bridge.id)) end
 	disableBridgeButtons()
+	--reset undo for journey
+	local undo = {
+		action = "journey",
+		orig_id = origin.id,
+		dest_id = dest.id,
+		markers = {},
+		bridge = nil,
+		placed_students = {},
+		displaced_masters = {},
+		displaced_students = {},
+		displaced_origen_students = {},
+	}
+	GD.game.undo = {undo}
 
 	--build a temp map of the origen and destination city tiles by tile type
 	local o = {masters={}, students={}}
@@ -654,10 +749,10 @@ function studentJourney(params)
 			o.students[t.t]={g=g, c=t.c,}
 		end
 	end
-	if env.test.debug then
-		log("Origen tiles:")
-		log(o)
-	end
+	-- if env.test.debug then
+	-- 	log("Origen tiles:")
+	-- 	log(o)
+	-- end
 	local d = {masters={}, students={}}
 	for g,t in pairs(dest.tiles) do
 		if t.r == "master" then
@@ -666,10 +761,10 @@ function studentJourney(params)
 			d.students[t.t]={g=g, c=t.c,}
 		end
 	end
-	if env.test.debug then
-		log("Destination tiles:")
-		log(d)
-	end
+	-- if env.test.debug then
+	-- 	log("Destination tiles:")
+	-- 	log(d)
+	-- end
 
 	--determine winner of strength battle
 	local o_str = sizeOf(origin.tiles)
@@ -707,19 +802,24 @@ function studentJourney(params)
 					--return origen student
 					if env.test.debug then log("Already a student, send origin student "..t.." home") end
 					returnTile(td.g)
+					origin.tiles[td.g] = nil
 					place_tile = false
+					table.insert(undo.displaced_origen_students, td.g)
 				else
 					--return other player's dest student and master from destination
 					if env.test.debug then log("Sending player's tile(s) home") end
 					returnTile(d.students[t].g)
 					dest.tiles[d.students[t].g] = nil
+					table.insert(undo.displaced_students, d.students[t].g)
 					returnTile(d.masters[t].g)
 					dest.tiles[d.masters[t].g] = nil
+					table.insert(undo.displaced_masters, d.masters[t].g)
 				end
 			elseif d.masters[t] ~= nil and d.masters[t].c ~= td.c then
 				--return other player's master from destination
 				returnTile(d.masters[t].g)
 				dest.tiles[d.masters[t].g] = nil
+				table.insert(undo.displaced_masters, d.masters[t].g)
 			end
 			if place_tile then
 				--place the origen student in dest city
@@ -727,6 +827,7 @@ function studentJourney(params)
 				local tile = getObjectFromGUID(td.g)
 				clearDecal(tile.getGUID())
 				locateTile(tile, dest.id)
+				table.insert(undo.placed_students, tile.getGUID())
 			end
 			origin.tiles[td.g] = nil
 		end
@@ -737,12 +838,14 @@ function studentJourney(params)
 				--return origen student
 				if env.test.debug then log("Destination location not empty for type "..t..", send origin student home") end
 				returnTile(td.g)
+				table.insert(undo.displaced_origen_students, td.g)
 			else
 				--place origin student in empty destination space
 				if env.test.debug then log("Place origin student in empty destination space for type "..t) end
 				local tile = getObjectFromGUID(td.g)
 				clearDecal(tile.getGUID())
 				locateTile(tile, dest.id)
+				table.insert(undo.placed_students, tile.getGUID())
 			end
 			origin.tiles[td.g] = nil
 		end
@@ -752,6 +855,7 @@ function studentJourney(params)
 	local b = getObjectFromGUID(bridge_guid)
 	assert(b, "ERROR: studentJourney(): no bridge object for guid "..tostring(bridge_guid))
 	b.UI.setAttribute("mainPanel","active","false")
+	undo.bridge = {guid = bridge_guid, position = b.getPosition(), rotation = b.getRotation(),}
 	local trash = getObjectFromGUID(C.trash_guid)
 	trash.putObject(b)
 	GD.bridges[bridge_guid].intact = false
@@ -807,9 +911,12 @@ Set closed state and put a marker on the city.
 function closeCity(city_id)
 	--TODO: undo for this
 	if env.test.trace then log("closeCity(): "..tostring(city_id)) end
+	if GD.game.undo[1].markers == nil then GD.game.undo[1].markers = {} end
+	local undo = {}
 	GD.game.closed_cities = GD.game.closed_cities + 1
 	local city = GD.cities[city_id]
 	city.closed = true
+	undo.city_id = city_id
 	for g,md in pairs(C.markers) do
 		if not(contains(GD.game.used_markers, g)) then
 			local pos = Vector(city.pos)
@@ -821,9 +928,11 @@ function closeCity(city_id)
 			-- Wait.condition(function() m.setLock(true) end, function() return m.resting or m.isDestroyed() end, 5)
 			Wait.time(function() m.setLock(true) end, 2)
 			table.insert(GD.game.used_markers, g)
+			undo.guid = g
 			break
 		end
 	end
+	table.insert(GD.game.undo[1].markers, undo)
 end
 
 --[[ *****************************
