@@ -595,9 +595,13 @@ function undo(pcol)
 				if city.tiles[tile.getGUID()] != nil then city.tiles[tile.getGUID()] = nil end
 			end
 			clearDecal(tile.getGUID())
-    elseif undo.action == "start-journey" then
-			--undo start Journey button click
+    elseif undo.action == "select-journey" then
+			--undo Journey button click
 			disableBridgeButtons()
+		elseif undo.action == "start-journey" then
+
+			--TODO: implement journey ack dialog
+
 		elseif undo.action == "journey" then
 			GD.game.journey_completed = false
 			--return markers (if any)
@@ -630,7 +634,7 @@ function undo(pcol)
 			else
 				log("ERROR: undo(): No bridge data for journey undo")
 			end
-			--return students from destination to origen (if any)
+			--return students from destination to origin (if any)
 			if undo.placed_students ~= nil then
 				if env.test.debug then log("Undo students placed in destination") end
 				for _,g in ipairs(undo.placed_students) do
@@ -661,11 +665,11 @@ function undo(pcol)
 					end
 				end
 			end, 60)
-			--return displaced students to origen (if any)
+			--return displaced students to origin (if any)
 			Wait.frames(function()
-				if undo.displaced_origen_students ~= nil then
-					if env.test.debug then log("Undo students displaced from origen") end
-					for _,g in ipairs(undo.displaced_origen_students) do
+				if undo.displaced_origin_students ~= nil then
+					if env.test.debug then log("Undo students displaced from origin") end
+					for _,g in ipairs(undo.displaced_origin_students) do
 						local tile = getObjectFromGUID(g)
 						locateTile(tile, undo.orig_id)
 						if GD.env.use_student_decals then addDecal(g) end
@@ -698,12 +702,122 @@ function undo(pcol)
 end
 
 --[[ *****************************
+Setup a student journey for the selected bridge and direction.
+Called from a bridge object when player clicks a displayed arrow.
+params:
+	guid:	bridge GUID
+	pcol:	player.color
+	id:		arrow button id ("upArrow" or "downArrow")
+TODO: just working on a concept here, not yet part of the game
+********************************]]
+function startStudentJourney(params)
+	if env.test.trace then log("startStudentJourney()") end
+	if env.test.debug then log(params) end
+	GD.game.journey = {}
+	local journey = GD.game.journey
+	journey.player_color = params.pcol
+	journey.bridge_guid = params.guid
+	journey.origin = {}
+	journey.dest = {}
+	--"upArrow" is moving from smaller number city to bigger.  "downArrow" is moving from bigger to smaller.
+	local bridge = GD.bridges[journey.bridge_guid]
+	if params.id == "upArrow" then
+		journey.origin.city = GD.cities[bridge.cities[1]]
+		journey.dest.city = GD.cities[bridge.cities[2]]
+	elseif params.id == "downArrow" then
+		journey.origin.city = GD.cities[bridge.cities[2]]
+		journey.dest.city = GD.cities[bridge.cities[1]]
+	else
+		log("ERROR: startStudentJourney(): Unknown arrow button id")
+		return
+	end
+	GD.game.undo = {action = "start-journey",}
+	--setup journey tile data
+	journey.origin.masters = {}
+	journey.origin.students = {}
+	journey.origin.strength = sizeOf(journey.origin.city.tiles)
+	for g,td in pairs(journey.origin.city.tiles) do
+		if td.r == "master" then
+			journey.origin.masters[td.t]={g=g, c=td.c,}
+		else
+			journey.origin.students[td.t]={g=g, c=td.c,}
+		end
+	end
+	journey.dest.masters = {}
+	journey.dest.students = {}
+	journey.dest.strength = sizeOf(journey.dest.city.tiles)
+	for g,td in pairs(journey.dest.city.tiles) do
+		if td.r == "master" then
+			journey.dest.masters[td.t]={g=g, c=td.c,}
+		else
+			journey.dest.students[td.t]={g=g, c=td.c,}
+		end
+	end
+	--determine city winner
+	local origin_wins = false
+	if journey.origin.strength > journey.dest.strength then
+		origin_wins = true
+	elseif (journey.origin.strength == journey.dest.strength) and (sizeOf(journey.origin.masters) > sizeOf(journey.dest.masters)) then
+		origin_wins = true
+	end
+	--setup tile actions
+	for type,_ in pairs(journey.origin.students) do
+		if origin_wins then
+			journey.origin.students[type].action = "place"
+			if journey.dest.masters[type] != nil then
+				journey.dest.masters[type].action = "return"
+				if journey.dest.students[type] != nil then
+					journey.dest.students[type].action = "return"
+				end
+			end
+		else
+			if journey.dest.masters[type] == nil then
+				journey.origin.students[type].action = "place"
+			else
+				journey.origin.students[type].action = "return"
+			end
+		end
+	end
+	--determine if city closed
+	journey.origin.closed = true
+	for _,neigbor in ipairs(journey.origin.city.neighbors) do
+		if GD.bridges[C.bridges[neigbor.bridge].guid].intact then		--TODO: refactor bridge meta data to avoid this lookup
+			journey.origin.closed = false
+			break
+		end
+	end
+	journey.dest.closed = true
+	for _,neigbor in ipairs(journey.dest.city.neighbors) do
+		if GD.bridges[C.bridges[neigbor.bridge].guid].intact then		--TODO: refactor bridge meta data to avoid this lookup
+			journey.dest.closed = false
+			break
+		end
+	end
+	if env.test.debug then log(journey) end
+
+	--TODO: display the student journey preview dialog
+
+end
+
+--[[ *****************************
+Process a student journey.
+Called after player ok's the preview dialog.
+********************************]]
+function processJourney()
+	if env.test.trace then log("studentJourney()") end
+
+	--TODO: implement
+
+end
+
+--[[ *****************************
 Process a student journey.
 Called from a bridge when player clicks on an arrow.
 params:
 	guid:	bridge GUID
 	pcol:	player.color
 	id:		arrow button id ("upArrow" or "downArrow")
+--TODO: looking at breaking this apart for a student journey preview
 ********************************]]
 function studentJourney(params)
 	if env.test.trace then log("studentJourney()") end
@@ -736,11 +850,11 @@ function studentJourney(params)
 		placed_students = {},
 		displaced_masters = {},
 		displaced_students = {},
-		displaced_origen_students = {},
+		displaced_origin_students = {},
 	}
 	GD.game.undo = {undo}
 
-	--build a temp map of the origen and destination city tiles by tile type
+	--build a temp map of the origin and destination city tiles by tile type
 	local o = {masters={}, students={}}
 	for g,t in pairs(origin.tiles) do
 		if t.r == "master" then
@@ -799,12 +913,12 @@ function studentJourney(params)
 			local place_tile = true
 			if d.students[t] ~= nil then
 				if d.students[t].c == td.c then
-					--return origen student
+					--return origin student
 					if env.test.debug then log("Already a student, send origin student "..t.." home") end
 					returnTile(td.g)
 					origin.tiles[td.g] = nil
 					place_tile = false
-					table.insert(undo.displaced_origen_students, td.g)
+					table.insert(undo.displaced_origin_students, td.g)
 				else
 					--return other player's dest student and master from destination
 					if env.test.debug then log("Sending player's tile(s) home") end
@@ -822,7 +936,7 @@ function studentJourney(params)
 				table.insert(undo.displaced_masters, d.masters[t].g)
 			end
 			if place_tile then
-				--place the origen student in dest city
+				--place the origin student in dest city
 				if env.test.debug then log("Placing student in dest city") end
 				local tile = getObjectFromGUID(td.g)
 				clearDecal(tile.getGUID())
@@ -835,10 +949,10 @@ function studentJourney(params)
 		if env.test.debug then log("Process journey for Destination wins") end
 		for t,td in pairs(o.students) do
 			if d.masters[t] ~= nil or d.students[t] ~= nil then
-				--return origen student
+				--return origin student
 				if env.test.debug then log("Destination location not empty for type "..t..", send origin student home") end
 				returnTile(td.g)
-				table.insert(undo.displaced_origen_students, td.g)
+				table.insert(undo.displaced_origin_students, td.g)
 			else
 				--place origin student in empty destination space
 				if env.test.debug then log("Place origin student in empty destination space for type "..t) end
@@ -1065,7 +1179,7 @@ function buttonClick(player, btn, id)
 		board_UI_setAttribute(pcol.."JourneyPanel","active","false")
 		board_UI_setAttribute(pcol.."UndoPanel","active","true")
 		board_UI_setAttribute(pcol.."DonePanel","active","false")
-		table.insert(GD.game.undo, {action = "start-journey"})
+		table.insert(GD.game.undo, {action = "select-journey"})
 		UI_setAttribute("statusActiveAction","text","Student Journey")
 	elseif action == "placement" then
 		--ignore TODO: remove this since not a button anymore?
