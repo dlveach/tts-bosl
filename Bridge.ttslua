@@ -4,5 +4,11 @@ function onLoad()
 end
 
 function arrowClick(player, btn, id)
-  Global.call("studentJourney", {guid=self.getGUID(), pcol=player.color, id=id})
+  local p = {
+    guid = self.getGUID(),
+    pcol = player.color,
+    id = id,
+    button = btn,
+  }
+  Global.call("startStudentJourney", p)
 end
