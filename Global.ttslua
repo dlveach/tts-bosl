@@ -1,12 +1,20 @@
---[[
-  TODO: documentation
+--[[ ********************************************************************************
+  The Bridges of Shragi-La (2003)
 
-	TODO:
-	-- BUG: HUGE: C.suggested_3_Player has fixed player colors!  4_Player same issue, but works because that's all player colors.
-	-- BUG: unused player color displayed in stats HUD in 3 player game
+	BGG URL: https://boardgamegeek.com/boardgame/8190/bridges-shangri-la
+	Designer: Leo Colovini
+	Publishers:
+			KOSMOS
+			999 Games
+			Überplay
+
+	Mod by David Veach (2023)
+
+	TODO: Bugfixes, ideas and such
 	-- BUG: No Bridge UI setAttribute wrapper (save state on bridge UIs)
 	-- OCD: separate table of tile positions from GUIDs, take/replace tiles in top down order (indexed table of positions), build in setup
-]]
+
+******************************************************************************** ]]
 
 env = {}
 env.trace = true
@@ -16,7 +24,7 @@ env.test.debug = true
 env.test.trace = true
 env.test.force_fresh_save = false
 -- env.test.test_players = {"Blue","Yellow","Red","Purple"}
-env.test.test_players = {"Blue","Yellow","Purple"}
+-- env.test.test_players = {"Blue","Red","Purple"}
 env.test.hide_start_panel = false
 
 GD = {}
@@ -43,6 +51,7 @@ function onLoad(saved_data)
 	if (saved_data ~= "") then
     log("onLoad(): load with saved data")
     local restore_data = JSON.decode(saved_data)
+		--if env.test.debug then log(restore_data) end
     GD = restore_data
     restoreGameState()
   else
@@ -224,6 +233,13 @@ function startGame()
 		else
 			getObjectFromGUID(g).destruct()
 		end
+	end
+	if player_count == 3 then
+		for _,pcol in ipairs(C.player_colors) do
+			UI_setAttribute(pcol.."_statusRow","active",contains(GD.game.player_order, pcol))
+		end
+		UI_setAttribute("statusPanel","height","330")
+		UI_setAttribute("statusInnerPanel","height","310")
 	end
 	GD.game.current_player = math.random(1,#GD.game.player_order)
 	local current = GD.game.player_order[GD.game.current_player]
