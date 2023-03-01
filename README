@@ -1,0 +1,13 @@
+The Bridges of Shragi-La (2003)
+
+BGG URL: https://boardgamegeek.com/boardgame/8190/bridges-shangri-la
+Designer: Leo Colovini
+Publishers:
+    KOSMOS
+    999 Games
+    Überplay
+
+Mod by David Veach (2023)
+
+TODO: Bugfixes, ideas and such
+-- OCD: separate table of tile positions from GUIDs, take/replace tiles in top down order (indexed table of positions), build in setup
