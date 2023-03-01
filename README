@@ -7,7 +7,9 @@ Publishers:
     999 Games
     Überplay
 
-Mod by David Veach (2023)
+TTS Mod by David Veach (2023)
+
+Tabletop Simulator: https://www.tabletopsimulator.com
 
 TODO: Bugfixes, ideas and such
 -- OCD: separate table of tile positions from GUIDs, take/replace tiles in top down order (indexed table of positions), build in setup
