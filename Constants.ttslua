@@ -10,6 +10,12 @@ C.student_border_url = "http://cloud-3.steamusercontent.com/ugc/2000198497751758
 
 C.tile_types = {"Rain","Astro","Dragon","Priest","Yeti","Fire","Healer"}
 
+C.masterButtonParams = 	{
+	click_function = "masterClick",
+	width=400,
+	height=400,
+}
+
 C.markers = {
   ["2f93af"]={p={x=-23.2136783599854, y=1.0550822019577, z=7.42621421813965},},
   ["fb860c"]={p={x=-21.7794094085693, y=1.0550822019577, z=7.47151470184326},},
@@ -93,65 +99,75 @@ C.cities = {
   },
 }
 
-C.suggested_3_Player = {
-  ["520e60"]={t="Yeti", c="Yellow", city=9,},
-  ["297827"]={t="Rain", c="Yellow", city=10,},
-  ["515ce6"]={t="Priest", c="Yellow", city=8,},
-  ["e720d5"]={t="Healer", c="Yellow", city=7,},
-  ["4f9188"]={t="Fire", c="Yellow", city=5,},
-  ["902ef0"]={t="Dragon", c="Yellow", city=12,},
-  ["10ac9d"]={t="Astro", c="Yellow", city=11,},
-  --Red
-  ["698027"]={t="Priest", c="Red", city=4,},
-  ["092ae9"]={t="Rain", c="Red", city=12,},
-  ["369887"]={t="Yeti", c="Red", city=1,},
-  ["1164f3"]={t="Healer", c="Red", city=13,},
-  ["29cd49"]={t="Fire", c="Red", city=6,},
-  ["305f23"]={t="Dragon", c="Red", city=8,},
-  ["eda5b6"]={t="Astro", c="Red", city=10,},
-  --Blue
-  ["5b8bc9"]={t="Yeti", c="Blue", city=4,},
-  ["a12c36"]={t="Rain", c="Blue", city=1,},
-  ["8a6ce4"]={t="Priest", c="Blue", city=9,},
-  ["cdea39"]={t="Healer", c="Blue", city=5,},
-  ["c1bed0"]={t="Fire", c="Blue", city=13,},
-  ["b14285"]={t="Dragon", c="Blue", city=7,},
-  ["87df87"]={t="Astro", c="Blue", city=6,},
+C.suggested_3_player_placement = {
+  {
+    ["Yeti"] = 9,
+    ["Rain"] = 10,
+    ["Priest"] = 8,
+    ["Healer"] = 7,
+    ["Fire"] = 5,
+    ["Dragon"] = 12,
+    ["Astro"] = 11,
+  },
+  {
+    ["Priest"] = 4,
+    ["Rain"] = 12,
+    ["Yeti"] = 1,
+    ["Healer"] = 13,
+    ["Fire"] = 6,
+    ["Dragon"] = 8,
+    ["Astro"] = 10,
+  },
+  {
+    ["Yeti"] = 4,
+    ["Rain"] = 1,
+    ["Priest"] = 9,
+    ["Healer"] = 5,
+    ["Fire"] = 13,
+    ["Dragon"] = 7,
+    ["Astro"] = 6,
+  },
 }
-C.suggested_4_Player = {
-  --Yellow starting locations
-  ["520e60"]={t="Yeti", c="Yellow", city=11,},
-  ["297827"]={t="Rain", c="Yellow", city=7,},
-  ["515ce6"]={t="Priest", c="Yellow", city=9,},
-  ["e720d5"]={t="Healer", c="Yellow", city=7,},
-  ["4f9188"]={t="Fire", c="Yellow", city=13,},
-  ["902ef0"]={t="Dragon", c="Yellow", city=2,},
-  ["10ac9d"]={t="Astro", c="Yellow", city=10,},
-  --Red
-  ["698027"]={t="Priest", c="Red", city=4,},
-  ["092ae9"]={t="Rain", c="Red", city=10,},
-  ["369887"]={t="Yeti", c="Red", city=8,},
-  ["1164f3"]={t="Healer", c="Red", city=1,},
-  ["29cd49"]={t="Fire", c="Red", city=9,},
-  ["305f23"]={t="Dragon", c="Red", city=8,},
-  ["eda5b6"]={t="Astro", c="Red", city=2,},
-  --Blue
-  ["5b8bc9"]={t="Yeti", c="Blue", city=4,},
-  ["a12c36"]={t="Rain", c="Blue", city=11,},
-  ["8a6ce4"]={t="Priest", c="Blue", city=11,},
-  ["cdea39"]={t="Healer", c="Blue", city=5,},
-  ["c1bed0"]={t="Fire", c="Blue", city=5,},
-  ["b14285"]={t="Dragon", c="Blue", city=7,},
-  ["87df87"]={t="Astro", c="Blue", city=9,},
-  --Purple
-  ["1585e9"]={t="Yeti", c="Purple", city=1,},
-  ["a90383"]={t="Rain", c="Purple", city=8,},
-  ["77389b"]={t="Priest", c="Purple", city=10,},
-  ["c75a96"]={t="Healer", c="Purple", city=13,},
-  ["f363e7"]={t="Fire", c="Purple", city=1,},
-  ["b5c536"]={t="Dragon", c="Purple", city=13,},
-  ["c913f6"]={t="Astro", c="Purple", city=5,},
+
+C.suggested_4_player_placement = {
+  {
+    ["Yeti"] = 11,
+    ["Rain"] = 7,
+    ["Priest"] = 9,
+    ["Healer"] = 7,
+    ["Fire"] = 13,
+    ["Dragon"] = 2,
+    ["Astro"] = 10,
+  },
+  {
+    ["Priest"] = 4,
+    ["Rain"] = 10,
+    ["Yeti"] = 8,
+    ["Healer"] = 1,
+    ["Fire"] = 9,
+    ["Dragon"] = 8,
+    ["Astro"] = 2,
+  },
+  {
+    ["Yeti"] = 4,
+    ["Rain"] = 11,
+    ["Priest"] = 11,
+    ["Healer"] = 5,
+    ["Fire"] = 5,
+    ["Dragon"] = 7,
+    ["Astro"] = 9,
+  },
+  {
+    ["Yeti"] = 1,
+    ["Rain"] = 8,
+    ["Priest"] = 10,
+    ["Healer"] = 13,
+    ["Fire"] = 1,
+    ["Dragon"] = 13,
+    ["Astro"] = 5,
+	}
 }
+
 C.tiles = {
   --Yellow
   ["520e60"]={i=true, t="Yeti", c="Yellow", p={x=-25.8091430664063, y=0.960000157356262, z=-11.0937852859497},},

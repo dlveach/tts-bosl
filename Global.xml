@@ -157,7 +157,7 @@
   </VerticalLayout>
 </Panel>
 
-<Panel id="statusPanel" class="StatusPanel" width="320" height="370" offsetXY="-800 350" active="false">
+<Panel id="statusPanel" class="StatusPanel" width="320" height="370" offsetXY="-750 350" active="false">
   <Panel class="InnerPanel" width="300" height="350">
     <TableLayout id="statusTable" columnWidths="0 100 100">
       <Row class="StatusTitle">
@@ -239,7 +239,7 @@
   </Panel>
 </Panel>
 
-<Panel id="journeyAckPanel" class="StatusPanel" width="620" height="670" active="false">
+<Panel id="journeyAckPanel" class="StatusPanel" width="620" height="670" offsetXY="600 160" active="false">
   <Panel class="InnerPanel" width="600" height="650">
     <TableLayout columnWidths="295 0 295">
       <Row preferredHeight="40" >
@@ -477,13 +477,13 @@
       <Row preferredHeight="80">
         <Cell padding="85 55 15 15">
           <Button id="js_cancel" onClick="journeyDialogClick">
-            <Text class="med_large" text="Cancel"/>
+            <Text class="med_large" text="Close Preview"/>
           </Button>
         </Cell>
         <Cell/>
         <Cell padding="50 90 15 15">
           <Button id="js_ok" onClick="journeyDialogClick">
-            <Text class="med_large" text="OK"/>
+            <Text class="med_large" text="Go!"/>
           </Button>
         </Cell>
       </Row>
