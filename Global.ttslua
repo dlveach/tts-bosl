@@ -21,9 +21,9 @@ env.test = {}
 env.test.trace = true
 env.test.debug = true
 env.test.in_dev = false
-env.test.force_fresh_save = false
+env.test.force_fresh_save = false --disable for normal play, true during development
 env.test.hide_start_panel = false
- -- env.test.test_players = {"Blue","Yellow","Red","Purple"}
+-- env.test.test_players = {"Blue","Yellow","Red","Purple"}
 -- env.test.test_players = {"Blue","Red","Purple"}
 
 GD = {}
@@ -41,10 +41,10 @@ function onLoad(saved_data)
 		for g,_ in pairs(C.markers) do
 			getObjectFromGUID(g).interactable = false
 		end
-		for g,_ in pairs(C.tiles) do
-			local tile = getObjectFromGUID(g)
-			if tile then tile.interactable = false end
-		end
+		-- for g,_ in pairs(C.tiles) do
+		-- 	local tile = getObjectFromGUID(g)
+		-- 	if tile then tile.interactable = false end
+		-- end
 		getObjectFromGUID(C.trash_guid).interactable = false
 	end
 
@@ -57,6 +57,12 @@ function onLoad(saved_data)
   else
 		log("onLoad(): load with fresh state")
 		onLoadInit()
+		if not(env.test.in_dev) then
+			for g,_ in pairs(C.tiles) do
+				local tile = getObjectFromGUID(g)
+				if tile then tile.interactable = false end
+			end
+		end
 	end
 end
 
@@ -185,6 +191,7 @@ function onLoadInit()
 	GD.game.stage = "init"
 	GD.game.current_player = ""
 	UI_setAttribute("journeyAckPanel","visibility","Pink")
+	-- UI_setAttribute("journeyAckPanel","visibility","")
 	UI_setAttribute("journeyAckPanel","active","true")
 	UI_setAttribute("opt_use_suggested_setup", "isOn", GD.env.use_suggested_placement)
 	local s = "Use the rules suggested opening masaters tile placement."
@@ -276,9 +283,14 @@ function startGame()
 		end
 		for _,pcol in ipairs(C.player_colors) do
 			UI_setAttribute(pcol.."_statusRow","active",contains(GD.game.player_order, pcol))
+			UI_setAttribute(pcol.."_impactRow","active",contains(GD.game.player_order, pcol))
 		end
 		UI_setAttribute("statusPanel","height","330")
 		UI_setAttribute("statusInnerPanel","height","310")
+		UI_setAttribute("journeyAckPanel","height","840")
+		UI_setAttribute("journeyAckInnerPanel","height","820")
+		UI_setAttribute("journeyImpactRow","preferredHeight","140")
+		UI_setAttribute("journeyImpactTable","Height","140")
 	end
 	GD.game.current_player = math.random(1,#GD.game.player_order)
 	local current = GD.game.player_order[GD.game.current_player]
@@ -682,27 +694,35 @@ function updateScores()
 	end
 	for pcol,score in pairs(GD.game.scores) do
 		for _,city in ipairs(GD.cities) do
-			local found_master = false
-			local masters = 0
-			for g,td in pairs(city.tiles) do
-				if td.c == pcol then
-					if td.r == "master" then
-						if not(found_master) then
-							score.cities = score.cities + 1
-							found_master = true
-						end
-						masters = masters + 1
-					end
-				end
-			end
-			score.masters = score.masters + masters
+			score.masters = score.masters + cityScore(pcol, city.id)
+			if cityPresence(pcol, city.id) then score.cities = score.cities + 1 end
 		end
 	end
-	-- if env.test.debug then log(GD.game.scores) end
 	for pcol,score in pairs(GD.game.scores) do
 		UI_setAttribute(pcol.."_statusCities","text",tostring(score.cities))
 		UI_setAttribute(pcol.."_statusMasters","text",tostring(score.masters))
 	end
+end
+
+--[[ *****************************
+Return count of master tiles owned by player in city.
+********************************]]
+function cityScore(pcol, city_id)
+	local count = 0
+	for _,td in pairs(GD.cities[city_id].tiles) do
+		if td.c == pcol and td.r == "master" then count = count + 1 end
+	end
+	return count
+end
+
+--[[ *****************************
+Return true if city has at least one master tile owned by player.  False if not.
+********************************]]
+function cityPresence(pcol, city_id)
+	for _,td in pairs(GD.cities[city_id].tiles) do
+		if td.c == pcol and td.r == "master" then return true end
+	end
+	return false
 end
 
 --[[ *****************************
@@ -907,6 +927,7 @@ function startStudentJourney(params)
 		journey.origin_wins = true
 	end
 	--setup tile actions
+	journey.scores = simpleDeepCopy(GD.game.scores)
 	for type,td in pairs(journey.origin.students) do
 		if journey.origin_wins then
 			if journey.dest.students[type] ~= nil and journey.dest.students[type].c == td.c then
@@ -917,16 +938,20 @@ function startStudentJourney(params)
 			elseif journey.dest.masters[type] ~= nil and journey.dest.masters[type].c ~= td.c then
 				journey.origin.students[type].action = "place"
 				journey.dest.masters[type].action = "return"
+				journey.scores[journey.dest.masters[type].c].masters = journey.scores[journey.dest.masters[type].c].masters - 1
+				journey.scores[td.c].masters = journey.scores[td.c].masters + 1
 				if journey.dest.students[type] ~= nil then
 					journey.dest.students[type].action = "return"
 				end
 			else
 				journey.origin.students[type].action = "place"
 				journey.dest.additions[type] = "master"
+				journey.scores[td.c].masters = journey.scores[td.c].masters + 1
 			end
 		else
 			if journey.dest.masters[type] == nil then
 				journey.origin.students[type].action = "place"
+				journey.scores[td.c].masters = journey.scores[td.c].masters + 1
 			else
 				journey.origin.students[type].action = "return"
 			end
@@ -1015,6 +1040,17 @@ function startStudentJourney(params)
 					UI_setAttribute("sj_dest_student_action_"..type,"active","true")
 				end
 			end
+		end
+		for pcol,score in pairs(journey.scores) do
+			local delta = score.masters - GD.game.scores[pcol].masters
+			local s = tostring(delta)
+			if delta == 0 then s = ""
+			elseif delta > 0 then s = "+"..s end
+			UI_setAttribute(pcol.."_impactMasters","text",s)
+			if delta < 0 and cityScore(pcol, journey.dest.city.id) + delta <= 0 then s = "-1"
+			elseif delta > 0 and cityScore(pcol, journey.dest.city.id) == 0 then s = "+1"
+			else s = "" end
+			UI_setAttribute(pcol.."_impactCities","text",s)
 		end
 		UI_setAttribute("journeyAckPanel","visibility",params.pcol)
 		board_UI_setAttribute(params.pcol.."UndoPanel","active","false")

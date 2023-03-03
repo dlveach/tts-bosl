@@ -84,7 +84,7 @@
         color="rgba(0,0,0,0)"  />
 
   <Cell
-        dontUseTableCellBackground="true" />
+        dontUseTableCellBackground="true" />  <!-- set to false to show grid lines -->
 
   <Cell class="StatusTitle"
         dontUseTableCellBackground="true"
@@ -239,15 +239,15 @@
   </Panel>
 </Panel>
 
-<Panel id="journeyAckPanel" class="StatusPanel" width="620" height="670" offsetXY="600 160" active="false">
-  <Panel class="InnerPanel" width="600" height="650">
+<Panel id="journeyAckPanel" class="StatusPanel" width="620" height="870" offsetXY="620 100" active="false">
+  <Panel id="journeyAckInnerPanel" class="InnerPanel" width="600" height="850">
     <TableLayout columnWidths="295 0 295">
       <Row preferredHeight="40" >
         <Cell columnSpan="3"> <Text fontSize="24" color="Cyan" text="Journey of the Students"/> </Cell>
       </Row>
       <Row preferredHeight="20" />
       <Row preferredHeight="500" >
-        <Cell padding="80 15 0 0">
+        <Cell padding="60 35 0 0">
           <TableLayout columnWidths="60 20 60 60"> <!-- Origin City -->
             <Row preferredHeight="60">
               <Cell columnSpan="3">
@@ -391,13 +391,13 @@
                 <Image id="sj_dest_master_Astro" image="Grey-Astro" preserveAspect="true" />
               </Cell>
               <Cell padding="5 5 5 5">
-                <Image id="sj_dest_master_action_Astro" image="Sprites/Icons/Cancel" color="Red" preserveAspect="true" />
+                <Image id="sj_dest_master_action_Astro" image="Red-X-Green-Plus" preserveAspect="true" />
               </Cell>
               <Cell padding="5 5 5 5">
                 <Image id="sj_dest_student_Astro" image="Grey-Astro" preserveAspect="true" />
               </Cell>
               <Cell padding="5 5 5 5">
-                <Image id="sj_dest_student_action_Astro" image="Sprites/Icons/Cancel" color="Red" preserveAspect="true"/>
+                <Image id="sj_dest_student_action_Astro" image="3d-Green-Plus" preserveAspect="true"/>
               </Cell>
             </Row>
             <Row preferredHeight="60">
@@ -405,7 +405,7 @@
                 <Image id="sj_dest_master_Dragon" image="Grey-Dragon" preserveAspect="true" />
               </Cell>
               <Cell padding="5 5 5 5">
-                <Image id="sj_dest_master_action_Dragon" image="Sprites/Icons/Cancel" color="Red" preserveAspect="true" />
+                <Image id="sj_dest_master_action_Dragon" active="false" image="Sprites/Icons/Cancel" color="Red" preserveAspect="true" />
               </Cell>
               <Cell padding="5 5 5 5">
                 <Image id="sj_dest_student_Dragon" image="Grey-Dragon" preserveAspect="true" />
@@ -419,7 +419,7 @@
                 <Image id="sj_dest_master_Priest" image="Grey-Priest" preserveAspect="true" />
               </Cell>
               <Cell padding="5 5 5 5">
-                <Image id="sj_dest_master_action_Priest" image="Sprites/Icons/Cancel" color="Red" preserveAspect="true" />
+                <Image id="sj_dest_master_action_Priest" active="false" image="Sprites/Icons/Cancel" color="Red" preserveAspect="true" />
               </Cell>
               <Cell padding="5 5 5 5">
                 <Image id="sj_dest_student_Priest" image="Grey-Priest" preserveAspect="true" />
@@ -433,7 +433,7 @@
                 <Image id="sj_dest_master_Yeti" image="Grey-Yeti" preserveAspect="true" />
               </Cell>
               <Cell padding="5 5 5 5">
-                <Image id="sj_dest_master_action_Yeti" image="Sprites/Icons/Cancel" color="Red" preserveAspect="true" />
+                <Image id="sj_dest_master_action_Yeti" active="false" image="Sprites/Icons/Cancel" color="Red" preserveAspect="true" />
               </Cell>
               <Cell padding="5 5 5 5">
                 <Image id="sj_dest_student_Yeti" image="Grey-Yeti" preserveAspect="true" />
@@ -447,7 +447,7 @@
                 <Image id="sj_dest_master_Fire" image="Grey-Fire" preserveAspect="true" />
               </Cell>
               <Cell padding="5 5 5 5">
-                <Image id="sj_dest_master_action_Fire" image="Sprites/Icons/Cancel" color="Red" preserveAspect="true" />
+                <Image id="sj_dest_master_action_Fire" active="false" image="Sprites/Icons/Cancel" color="Red" preserveAspect="true" />
               </Cell>
               <Cell padding="5 5 5 5">
                 <Image id="sj_dest_student_Fire" image="Grey-Fire" preserveAspect="true" />
@@ -461,7 +461,7 @@
                 <Image id="sj_dest_master_Healer" image="Grey-Healer" preserveAspect="true" />
               </Cell>
               <Cell padding="5 5 5 5">
-                <Image id="sj_dest_master_action_Healer" image="Sprites/Icons/Cancel" color="Red" preserveAspect="true" />
+                <Image id="sj_dest_master_action_Healer" active="false" image="Sprites/Icons/Cancel" color="Red" preserveAspect="true" />
               </Cell>
               <Cell padding="5 5 5 5">
                 <Image id="sj_dest_student_Healer" image="Grey-Healer" preserveAspect="true" />
@@ -473,15 +473,55 @@
           </TableLayout>
         </Cell>
       </Row>
-      <Row preferredHeight="10"/>
-      <Row preferredHeight="80">
-        <Cell padding="85 55 15 15">
+      <Row preferredHeight="20"/>
+      <Row preferredHeight="20">
+        <Cell/>
+        <Cell/>
+        <Cell>
+          <Text class="small" color="Grey" text="Score Impact" />
+        </Cell>
+      </Row>
+      <Row id="journeyImpactRow" preferredHeight="170"> <!-- Score Impact -->
+        <Cell/>
+        <Cell/>
+        <Cell padding="10 50 0 0">
+          <TableLayout id="journeyImpactTable" columnWidths="0 70 70">
+            <Row preferredHeight="30">
+              <Cell/>
+              <Cell><Text class="small" color="Grey" text="Cities"/></Cell>
+              <Cell><Text class="small" color="Grey" text="Masters"/></Cell>
+            </Row>
+            <Row id="Yellow_impactRow" preferredHeight="30">
+              <Cell><Text class="medium" text="Yellow" color="Yellow"/></Cell>
+              <Cell><Text id="Yellow_impactCities" class="medium" text="0"/></Cell>
+              <Cell><Text id="Yellow_impactMasters" class="medium" text="0"/></Cell>
+            </Row>
+            <Row id="Red_impactRow" preferredHeight="30">
+              <Cell><Text class="medium" text="Red" color="Red"/></Cell>
+              <Cell><Text id="Red_impactCities" class="medium" text="0"/></Cell>
+              <Cell><Text id="Red_impactMasters" class="medium" text="0"/></Cell>
+            </Row>
+            <Row id="Blue_impactRow" preferredHeight="30">
+              <Cell><Text class="medium" text="Blue" color="Blue"/></Cell>
+              <Cell><Text id="Blue_impactCities" class="medium" text="0"/></Cell>
+              <Cell><Text id="Blue_impactMasters" class="medium" text="0"/></Cell>
+            </Row>
+            <Row id="Purple_impactRow" preferredHeight="30">
+              <Cell><Text class="medium" text="Purple" color="Purple"/></Cell>
+              <Cell><Text id="Purple_impactCities" class="medium" text="0"/></Cell>
+              <Cell><Text id="Purple_impactMasters" class="medium" text="0"/></Cell>
+            </Row>
+          </TableLayout>
+        </Cell>
+      </Row>
+      <Row preferredHeight="70">
+        <Cell padding="70 70 15 15">
           <Button id="js_cancel" onClick="journeyDialogClick">
             <Text class="med_large" text="Close Preview"/>
           </Button>
         </Cell>
         <Cell/>
-        <Cell padding="50 90 15 15">
+        <Cell padding="70 70 15 15">
           <Button id="js_ok" onClick="journeyDialogClick">
             <Text class="med_large" text="Go!"/>
           </Button>
