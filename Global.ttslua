@@ -23,7 +23,7 @@ env.test.debug = true
 env.test.in_dev = false
 env.test.force_fresh_save = false
 env.test.hide_start_panel = false
--- env.test.test_players = {"Blue","Yellow","Red","Purple"}
+ -- env.test.test_players = {"Blue","Yellow","Red","Purple"}
 -- env.test.test_players = {"Blue","Red","Purple"}
 
 GD = {}
@@ -1268,15 +1268,7 @@ function buttonClick(player, btn, id)
 			end
 		end
 		if GD.game.stage == "end" then
-			broadcastToAll("GAME IS OVER!")
-			if env.test.debug then log(GD.game.scores) end
-			for _,pcol in ipairs(GD.game.player_order) do
-				board_UI_setAttribute(params.pcol.."buttonPanel","active","false")
-			end
-			for g,_ in pairs(C.tiles) do
-				local tile = getObjectFromGUID(g)
-				if tile then tile.interactable = false end
-			end
+			gameEnd()
 			return
 		end
 		setActivePlayer()
@@ -1292,6 +1284,73 @@ function buttonClick(player, btn, id)
 	else
 		log("ERROR: buttonClick(): No recognized action.")
 		return
+	end
+end
+
+--[[ *****************************
+Calculate winner and display final results.
+********************************]]
+function gameEnd()
+	if env.test.trace then log("gameEnd()") end
+	--determine winner
+	if env.test.debug then log(GD.game.scores) end
+	local winners = {}
+	local top_score = 0
+	local city_winners = {}
+	local top_cities = 0
+	for pcol,score_data in pairs(GD.game.scores) do
+		if score_data.masters > top_score then
+			top_score = score_data.masters
+			winners = {pcol}
+		elseif score_data.masters == top_score then
+			table.insert(winners,pcol)
+		end
+	end
+	if #winners > 1 then
+		for _,pcol in ipairs(winners) do
+			if GD.game.scores[pcol].cities > top_cities then
+				top_cities = GD.game.scores[pcol].cities
+				city_winners = {pcol}
+			elseif GD.game.scores[pcol].cities == top_cities then
+				table.insert(city_winners, pcol)
+			end
+		end
+	end
+	local winner = ""
+	local tied = {}
+	if #winners == 1 then
+		winner = winners[1]
+	else
+		for _,pcol in ipairs(winners) do
+			if contains(city_winners, pcol) then
+				table.insert(tied,pcol)
+			end
+		end
+		if #tied == 1 then winner = tied[1] end
+	end
+	--display results
+	broadcastToAll("GAME IS OVER!")
+	UI_setAttribute("statusTitle","text","GAME IS OVER!")
+	if winner ~= "" then
+		UI_setAttribute("statusActivePlayer","text",winner)
+		UI_setAttribute("statusActivePlayer","color",winner)
+		UI_setAttribute("statusActiveAction","text","Wins the game!")
+	else
+		local s = ""
+		for _,pcol in ipairs(tied) do
+			s = s..pcol.." "
+		end
+		UI_setAttribute("statusActivePlayer","text",s)
+		UI_setAttribute("statusActivePlayer","color","White")
+		UI_setAttribute("statusActiveAction","text","Share the victory!")
+	end
+	-- lock player tiles & disable buttons
+	for _,pcol in ipairs(GD.game.player_order) do
+		board_UI_setAttribute(pcol.."PlayerPanel","active","false")
+	end
+	for g,_ in pairs(C.tiles) do
+		local tile = getObjectFromGUID(g)
+		if tile then tile.interactable = false end
 	end
 end
 
