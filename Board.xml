@@ -60,7 +60,7 @@
 
 </Defaults>
 
-<Panel class="buttonPanel" id="YellowPlayerPanel" position="181 116 0" >
+<Panel class="buttonPanel" id="YellowPlayerPanel" position="143 40 0" >
   <TableLayout columnWidths="80 80 100">
     <Row preferredHeight="40">
       <Cell >
@@ -85,7 +85,7 @@
   </TableLayout>
 </Panel>
 
-<Panel class="buttonPanel" id="RedPlayerPanel" position="68 116 0" >
+<Panel class="buttonPanel" id="RedPlayerPanel" position="55 116 0" >
   <TableLayout columnWidths="80 80 100">
     <Row preferredHeight="40">
       <Cell >
@@ -110,7 +110,7 @@
   </TableLayout>
 </Panel>
 
-<Panel class="buttonPanel" id="BluePlayerPanel" position="-67 116 0" >
+<Panel class="buttonPanel" id="BluePlayerPanel" position="-53 116 0" >
   <TableLayout columnWidths="80 80 100">
     <Row preferredHeight="40">
       <Cell >
@@ -135,7 +135,7 @@
   </TableLayout>
 </Panel>
 
-<Panel class="buttonPanel" id="PurplePlayerPanel" position="-175 116 0" >
+<Panel class="buttonPanel" id="PurplePlayerPanel" position="-142 40 0" >
   <TableLayout columnWidths="80 80 100">
     <Row preferredHeight="40">
       <Cell >

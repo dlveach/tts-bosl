@@ -11,6 +11,7 @@
 	Mod by David Veach (2023)
 
 	TODO: Bugfixes, ideas and such
+	-- Detect if no legal action and auto pass (Done) a player's turn
 	-- WARN: Remove UI stored state for destroyed objects (bridges) to prevent replay warnings on game reload.
 	-- OCD: separate table of tile positions from GUIDs, take/replace tiles in top down order (indexed table of positions), build in setup
 
@@ -18,13 +19,13 @@
 
 env = {}
 env.test = {}
-env.test.trace = true
-env.test.debug = true
+env.test.trace = false
+env.test.debug = false
 env.test.in_dev = false
 env.test.force_fresh_save = false --disable for normal play, true during development
 env.test.hide_start_panel = false
 -- env.test.test_players = {"Blue","Yellow","Red","Purple"}
--- env.test.test_players = {"Blue","Red","Purple"}
+-- env.test.test_players = {"Blue","Red","Yellow"}
 
 GD = {}
 
@@ -41,10 +42,6 @@ function onLoad(saved_data)
 		for g,_ in pairs(C.markers) do
 			getObjectFromGUID(g).interactable = false
 		end
-		-- for g,_ in pairs(C.tiles) do
-		-- 	local tile = getObjectFromGUID(g)
-		-- 	if tile then tile.interactable = false end
-		-- end
 		getObjectFromGUID(C.trash_guid).interactable = false
 	end
 
@@ -63,6 +60,9 @@ function onLoad(saved_data)
 				if tile then tile.interactable = false end
 			end
 		end
+	end
+	if env.test.hide_start_panel then
+		UI.setAttribute("startPanel","active","false")
 	end
 end
 
@@ -116,6 +116,28 @@ function restoreGameState()
 		else
 			--TODO: alieviate the need for this by removing UI states when trashing a bridge
 			if env.test.debug then log("WARN: restoreGameState(): Skipping UI replay on destroyed bridge "..tostring(guid)) end
+		end
+	end
+	--[[ restore master buttons ]]
+	Wait.frames(function() restoreMasterButtons() end, 1)
+end
+
+--[[ ******************************
+Restore buttons on master tiles in each city
+*********************************]]
+function restoreMasterButtons()
+	if env.test.trace then log("restoreMasterButtons()") end
+	for i,city in ipairs(GD.cities) do
+		for g,td in pairs(city.tiles) do
+			if td.r == "master" then
+				local tile = getObjectFromGUID(g)
+				if tile then
+					tile.clearButtons()
+					tile.createButton(C.masterButtonParams)
+				else
+					log("ERROR: no object for tile "..tostring(g))
+				end
+			end
 		end
 	end
 end
@@ -205,9 +227,7 @@ function onLoadInit()
 	s = s.."\nIf disabled, preview is shown on left-click and right-click will bypass preview."
 	s = s.."\nLeave disabled for new players."
 	UI_setAttribute("opt_alt_mouse_btn", "tooltip", s)
-	if not(env.test.hide_start_panel) then
-		UI_setAttribute("startPanel","active","true")
-	end
+	UI_setAttribute("startPanel","active","true")
 end
 
 --[[ *****************************
@@ -272,7 +292,6 @@ function startGame()
 	end
 	if player_count == 3 then
 		closeCity(3)
-		log("out probe")
 		local trash = getObjectFromGUID(C.trash_guid)
 		for g,bd in pairs(GD.bridges) do
 			if bd.id == 2 or bd.id == 8 or bd.id == 9 then
@@ -414,6 +433,7 @@ function onObjectDrop(pcol, obj)
   if env.test.trace then log("onObjectDrop(): "..pcol.." dropped "..obj.getGUID()) end
   --ignore non-tile objects
   if obj.tag ~= "Tile" then return end
+	if obj.hasTag("Ignore_Drop") then return end
   --dropped off board
   local board = getObjectFromGUID(C.board_guid)
   local center = board.getBounds()["center"]
@@ -753,7 +773,7 @@ function undo(pcol)
 					GD.game.closed_cities = GD.game.closed_cities - 1
 					GD.cities[undo_data.city_id].closed = false
 					for g,td in pairs(GD.cities[undo_data.city_id].tiles) do
-						if td.t == "master" then getObjectFromGUID(g).addButton(C.masterButtonParams) end
+						if td.r == "master" then getObjectFromGUID(g).createButton(C.masterButtonParams) end
 					end
 				end
 			end
@@ -865,7 +885,6 @@ params:
 function startStudentJourney(params)
 	if env.test.trace then log("startStudentJourney()") end
 	if env.test.debug then log(params) end
-	log(type(params.button))
 	local show_preview = true
 	if GD.env.alt_click_for_journey_preview then
 		if params.button == "-1" then
@@ -951,6 +970,7 @@ function startStudentJourney(params)
 		else
 			if journey.dest.masters[type] == nil then
 				journey.origin.students[type].action = "place"
+				journey.dest.additions[type] = "master"
 				journey.scores[td.c].masters = journey.scores[td.c].masters + 1
 			else
 				journey.origin.students[type].action = "return"
@@ -1190,6 +1210,7 @@ function returnTile(tile_guid)
 	local tile = getObjectFromGUID(tile_guid)
 	assert(tile, "ERROR: returnTile(): no object for tile guid "..tostring(tile_guid))
 	clearDecal(tile_guid)
+	tile.clearButtons()
 	tile.setLock(false)
 	tile.setVelocity(Vector(0,0,0))
 	tile.setPosition(snap_back)
@@ -1424,8 +1445,10 @@ function getPositions(pcol)
   local s = ""
   for _,o in ipairs(stuff) do
     local p = o.getPosition()
-    -- local t = '["'..o.getGUID()..'"]={t="'..o.getTags()[1]..'", c="'..o.getGMNotes()..'", p={x='..tostring(p.x)..", y="..tostring(p.y)..", z="..tostring(p.z).."},},"
-    local t = '["'..o.getGUID()..'"]={p={x='..tostring(p.x)..", y="..tostring(p.y)..", z="..tostring(p.z).."},},"
+		-- tile positions
+    local t = '["'..o.getGUID()..'"]={i=false, t="'..o.getTags()[1]..'", c="'..o.getGMNotes()..'", p={x='..tostring(p.x)..", y="..tostring(p.y)..", z="..tostring(p.z).."},},"
+		-- marker positions
+    -- local t = '["'..o.getGUID()..'"]={p={x='..tostring(p.x)..", y="..tostring(p.y)..", z="..tostring(p.z).."},},"
     log(t)
     s = s .. t .. '\n'
   end
