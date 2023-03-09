@@ -11,7 +11,6 @@
 	Mod by David Veach (2023)
 
 	TODO: Bugfixes, ideas and such
-	-- Detect if no legal action and auto pass (Done) a player's turn
 	-- WARN: Remove UI stored state for destroyed objects (bridges) to prevent replay warnings on game reload.
 	-- OCD: separate table of tile positions from GUIDs, take/replace tiles in top down order (indexed table of positions), build in setup
 
@@ -26,6 +25,7 @@ env.test.force_fresh_save = false --disable for normal play, true during develop
 env.test.hide_start_panel = false
 -- env.test.test_players = {"Blue","Yellow","Red","Purple"}
 -- env.test.test_players = {"Blue","Red","Yellow"}
+
 
 GD = {}
 
@@ -204,6 +204,7 @@ function onLoadInit()
 	GD.env.verbose = true
 	GD.env.use_student_decals = true
 	GD.env.alt_click_for_journey_preview = false
+	GD.env.auto_pass = true
 	GD.game.played_tiles = 0
 	GD.game.masters_placed = 0
 	GD.game.journey_completed = false
@@ -367,6 +368,7 @@ end
 Sets the active player.  Advance param defaults to true.
 ********************************]]
 function setActivePlayer(advance)
+	if env.test.trace then log("setActivePlayer()") end
 	if advance == nil then advance = true end
 	local board = getObjectFromGUID(C.board_guid)
 	local current = GD.game.player_order[GD.game.current_player]
@@ -375,6 +377,21 @@ function setActivePlayer(advance)
 		board_UI_setAttribute(current.."PlayerPanel", "active", "false")
 		GD.game.current_player = GD.game.current_player + 1
 		if GD.game.current_player > #GD.game.player_order then GD.game.current_player = 1 end --wrap
+		-- auto pass if next player has no valid action
+		if GD.env.auto_pass then
+			local new = GD.game.player_order[GD.game.current_player]
+			while(not(hasLegalMove(GD.game.player_order[GD.game.current_player]))) do
+				printToAll("Player "..GD.game.player_order[GD.game.current_player].." has no legal move, auto passing")
+				GD.game.current_player = GD.game.current_player + 1
+				if GD.game.current_player > #GD.game.player_order then GD.game.current_player = 1 end --wrap
+				if GD.game.player_order[GD.game.current_player] == new then
+					broadcastToAll("No player has a valid move!  End the game.")
+					GD.game.stage = "end"
+					gameEnd()
+					return
+				end
+			end
+		end
 		current = GD.game.player_order[GD.game.current_player]
 		if env.test.debug then log("Current player is now "..current) end
 		if env.test.test_players then
@@ -1222,6 +1239,7 @@ end
 Return true if city tile list contains at least one student for player color
 ********************************]]
 function hasStudent(tiles, pcol)
+	if env.test.trace then log("hasStudent(): "..pcol) end
 	for _,td in pairs(tiles) do
 		if td.c == pcol and td.r == "student" then return true end
 	end
@@ -1435,6 +1453,61 @@ function journeyDialogClick(player, btn, id)
 		log("ERROR: journeyDialogClick(): No recognized action.")
 		return
 	end
+end
+
+--[[ *****************************
+Return true if player color can place a student in specified city.  False if not
+********************************]]
+function canPlaceStudent(pcol, city_id)
+	if env.test.trace then log("canPlaceStudent(): Player "..tostring(pcol)..", city "..tostring(city_id)) end
+	local city = GD.cities[city_id]
+	for _,td in pairs(city.tiles) do
+		if td.c == pcol and td.r == "master" then
+			local no_student = true
+			for _,std in pairs(city.tiles) do
+				if std.c == pcol and std.t == td.t and std.r == "student" then
+					no_student = false
+					break
+				end
+			end
+			if no_student then
+				if contains(GD.game.players[pcol].unplayed_tiles, td.t) then return true end
+			end
+		end
+	end
+	return false
+end
+
+--[[ *****************************
+Return true if player color can place a master in specified city.  False if not
+********************************]]
+function canPlaceMaster(pcol, city_id)
+	if env.test.trace then log("canPlaceMaster(): Player "..tostring(pcol)..", city "..tostring(city_id)) end
+	local city = GD.cities[city_id]
+	for _,type in pairs(GD.game.players[pcol].unplayed_tiles) do
+		local empty = true
+		for _,td in pairs(city.tiles) do
+			if td.t == type then empty = false; break end
+		end
+		if empty then return true end
+	end
+	return false
+end
+
+--[[ *****************************
+Return true if player color has a legal move.  False if not.
+********************************]]
+function hasLegalMove(pcol)
+	if env.test.trace then log("hasLegalMove(): Player "..tostring(pcol)) end
+	if GD.game.stage == "placement" then return true end
+	for city_id,city in ipairs(GD.cities) do
+		if not(city.closed) and cityPresence(pcol, city_id) then
+			if hasStudent(city.tiles, pcol) then return true end
+			if canPlaceStudent(pcol, city_id) then return true end
+			if canPlaceMaster(pcol, city_id) then return true end
+		end
+	end
+	return false
 end
 
 --//////////////////////////////////////////////////////////////////////////////////////////////////////
