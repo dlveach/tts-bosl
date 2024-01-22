@@ -148,7 +148,7 @@
     </Panel>
     <Panel padding="100 100 0 60">
       <VerticalLayout allowDragging="false"
-        spacing="1" rectAlignment="Center" offsetXY="0 0">
+        spacing="1" rectAlignment="MiddleCenter" offsetXY="0 0">
         <Toggle class="Options" id="opt_use_suggested_setup" text="  Use suggested placement" />
         <Toggle class="Options" id="opt_verbose" text="  Verbose game messages" />
         <Toggle class="Options" id="opt_alt_mouse_btn" text="  Bypass Journey Prevew on left-click" />
