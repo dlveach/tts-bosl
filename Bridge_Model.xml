@@ -7,14 +7,13 @@
   <Image color="rgb(1,1,0)" raycastTarget="true" onClick="arrowClick"/>
 </Defaults>
 
-<Panel id="mainPanel" active="false" scale="2 2" class="Clear" width="100" height="600" rotation="0 0 90" position="0 0 0">
+<!-- Bridge arrows panel -->
+<Panel id="mainPanel" active="true" scale="2 2" width="100" height="600" rotation="0 0 90">
   <TableLayout>
     <Row prefferredHeight="80">
       <Cell><Panel id="upPanel" active="true"><Image id="upArrow" image="Sprites/Icons/Arrow_Up"/></Panel></Cell>
     </Row>
-    <Row prefferredHeight="100">
-      <Cell><Panel class="Clear"/></Cell>
-    </Row>
+    <Row prefferredHeight="100"/>
     <Row prefferredHeight="80">
       <Cell><Panel id="downPanel" active="true"><Image id="downArrow" image="Sprites/Icons/Arrow_Down"/></Panel></Cell>
     </Row>

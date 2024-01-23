@@ -911,6 +911,7 @@ params:
 function startStudentJourney(params)
 	if env.test.trace then log("startStudentJourney()") end
 	if env.test.debug then log(params) end
+	if GD.game.stage == "init" then return end
 	local show_preview = true
 	if GD.env.alt_click_for_journey_preview then
 		if params.button == "-1" then

@@ -72,7 +72,7 @@
     </Row>
   </TableLayout>
 </Panel>
-<!-- City strength panels -->
+<!-- City strength label panels -->
 <Panel class="City" id="cityPanel_1" position="48.5 -69.5 -15"><Text class="City" id="cityText_1" text="0"/></Panel>
 <Panel class="City" id="cityPanel_2" position="5.2 -71.4 -15"><Text class="City" id="cityText_2" text="0"/></Panel>
 <Panel class="City" id="cityPanel_3" position="-52.9 -64.5 -15"><Text class="City" id="cityText_3" text="0"/></Panel>

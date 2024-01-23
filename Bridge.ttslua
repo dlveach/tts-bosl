@@ -4,6 +4,7 @@ function onLoad()
 end
 
 function arrowClick(player, btn, id)
+  if env.test.trace then log(self.getGUID()..": arrowClick() "..player.color.." "..tostring(btn).." "..tostring(id)) end
   local p = {
     guid = self.getGUID(),
     pcol = player.color,
