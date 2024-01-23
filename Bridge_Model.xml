@@ -8,7 +8,7 @@
 </Defaults>
 
 <!-- Bridge arrows panel -->
-<Panel id="mainPanel" active="true" scale="2 2" width="100" height="600" rotation="0 0 90">
+<Panel id="mainPanel" active="false" scale="2 2" width="100" height="600" rotation="0 0 90">
   <TableLayout>
     <Row prefferredHeight="80">
       <Cell><Panel id="upPanel" active="true"><Image id="upArrow" image="Sprites/Icons/Arrow_Up"/></Panel></Cell>

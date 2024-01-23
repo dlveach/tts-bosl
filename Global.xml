@@ -13,7 +13,7 @@
   <Panel class="Dark Viewport">
     <TableLayout>
       <Row preferredHeight="80">
-        <Cell padding="0 0 10 10"><Text class="L Gray" text="After all players are seated:"/></Cell>
+        <Cell padding="0 0 10 10"><Text id="start_title" class="L Gray" text="After all players are seated:"/></Cell>
       </Row>
       <Row preferredHeight="80">
         <Cell padding="150 150 10 20"><Button id="startButton" onClick="startGameBtn" fontSize="20" text="Start"/></Cell>

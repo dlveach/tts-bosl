@@ -1,10 +1,9 @@
 function onLoad()
   env = Global.getTable("env")
-  --if env.test.debug then log("Loaded block "..self.getGUID()) end
 end
 
 function arrowClick(player, btn, id)
-  if env.test.trace then log(self.getGUID()..": arrowClick() "..player.color.." "..tostring(btn).." "..tostring(id)) end
+  if env.trace then log(self.getGUID()..": arrowClick() "..player.color.." "..tostring(btn).." "..tostring(id)) end
   local p = {
     guid = self.getGUID(),
     pcol = player.color,
