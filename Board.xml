@@ -1,82 +1,24 @@
-<XmlLayout xmlns="XmlLayout"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:schemaLocation="XmlLayout Configuration/XmlLayout.xsd">
+<XmlLayout xmlns="XmlLayout" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="XmlLayout Configuration/XmlLayout.xsd">
 
-<Defaults>
+<Include src="XmlDefaults.xml"/>
 
-  <Row  dontUseTableRowBackground="true" />
-
-  <Cell dontUseTableCellBackground="true" />
-
-  <Button hoverClass="hover"
-          pressClass="press"
-          selectClass="select"
-          onClick="Global/buttonClick"
-          color="blue"
-          textColor="white"
-          font="Arial"
-          fontSize="16"
-          image="Sprites/Layout/Button"
-          textShadow="rgba(0,0,0,0.6)" />
-
-  <Button class="hover"
-          color="cyan"
-          textColor="white"
-          textShadow="rgba(0,0,0,1)"/>
-
-  <Button class="press"
-          color="blue"
-          textColor="white" />
-
-  <Button class="select"
-          color="blue"
-          textColor="white"
-          textShadow="rgba(0,0,0,1)" />
-
+<Defaults>  <!-- Board.xml specific defaults -->
+  <Panel class="Player" width="260" height="50" scale="0.2 0.2" active="false" rotation="180 180 0" />
+  <Panel class="City" active="true" rotation="180 180 0" scale="0.2 0.24" color="rgba(0,0,0,1)" width="40" height="36" />
   <Text scale="0.5 0.5" />
-
-  <Panel class="buttonPanel"
-         active="false"
-         rotation="180 180 0"
-         scale="0.2 0.2"
-         color="rgba(0,0,0,0)"
-         width="260" height="50"
-         />
-
-  <Panel class="cityPanel"
-         active="true"
-         rotation="180 180 0"
-         scale="0.2 0.24"
-         color="rgba(0,0,0,1)"
-         width="40" height="36"
-         />
-
-  <Text class="cityText"
-        color="rgb(1,1,0)"
-        textShadow="rgba(0,0,0,0.6)"
-        font="Arial"
-        fontSize="32"
-        />
-
+  <Text class="City" color="rgb(1,1,0)" textShadow="rgba(0,0,0,0.6)" fontSize="32" />
+  <Button onClick="Global/buttonClick" />
 </Defaults>
 
-<Panel class="buttonPanel" id="YellowPlayerPanel" position="143 40 0" >
+<!-- Yellow player buttons -->
+<Panel id="YellowPlayerPanel" class="Player" position="143 40 0">
   <TableLayout columnWidths="80 80 100">
     <Row preferredHeight="40">
-      <Cell >
-        <Panel id="YellowDonePanel" padding="0 10 0 0">
-          <Button id="Yellow-done" text="Done" />
-        </Panel>
-      </Cell>
-      <Cell>
-        <Panel id="YellowUndoPanel" padding="10 10 0 0">
-          <Button id="Yellow-undo" text="Undo"/>
-        </Panel>
-      </Cell>
+      <Cell><Panel id="YellowDonePanel" padding="0 10 0 0"><Button id="Yellow-done" text="Done"/></Panel></Cell>
+      <Cell><Panel id="YellowUndoPanel" padding="10 10 0 0"><Button id="Yellow-undo" text="Undo"/></Panel></Cell>
       <Cell padding="10 0 0 0">
-        <Panel id="YellowJourneyPanel" padding="10 0 0 0">
-          <Button id="Yellow-enableJourney" text="Journey"/>
-        </Panel>
+        <Panel id="YellowJourneyPanel" padding="10 0 0 0"><Button id="Yellow-enableJourney" text="Journey"/></Panel>
         <Panel id="YellowPlacementPanel" padding="0 0 0 0" active="false">
           <Button id="Yellow-placement" text="Place Master" raycastTarget="false"/>
         </Panel>
@@ -84,24 +26,14 @@
     </Row>
   </TableLayout>
 </Panel>
-
-<Panel class="buttonPanel" id="RedPlayerPanel" position="55 116 0" >
+<!-- Red player buttons -->
+<Panel id="RedPlayerPanel" class="Player" position="55 116 0">
   <TableLayout columnWidths="80 80 100">
     <Row preferredHeight="40">
-      <Cell >
-        <Panel id="RedDonePanel" padding="0 10 0 0">
-          <Button id="Red-done" text="Done" />
-        </Panel>
-      </Cell>
-      <Cell>
-        <Panel id="RedUndoPanel" padding="10 10 0 0">
-          <Button id="Red-undo" text="Undo"/>
-        </Panel>
-      </Cell>
+      <Cell><Panel id="RedDonePanel" padding="0 10 0 0"><Button id="Red-done" text="Done"/></Panel></Cell>
+      <Cell><Panel id="RedUndoPanel" padding="10 10 0 0"><Button id="Red-undo" text="Undo"/></Panel></Cell>
       <Cell padding="10 0 0 0">
-        <Panel id="RedJourneyPanel" padding="10 0 0 0">
-          <Button id="Red-enableJourney" text="Journey"/>
-        </Panel>
+        <Panel id="RedJourneyPanel" padding="10 0 0 0"><Button id="Red-enableJourney" text="Journey"/></Panel>
         <Panel id="RedPlacementPanel" padding="10 0 0 0" active="false">
           <Button id="Red-placement" text="Place Master" raycastTarget="false"/>
         </Panel>
@@ -109,24 +41,14 @@
     </Row>
   </TableLayout>
 </Panel>
-
-<Panel class="buttonPanel" id="BluePlayerPanel" position="-53 116 0" >
+<!-- Blue player buttons -->
+<Panel id="BluePlayerPanel" class="Player" position="-53 116 0">
   <TableLayout columnWidths="80 80 100">
     <Row preferredHeight="40">
-      <Cell >
-        <Panel id="BlueDonePanel" padding="0 10 0 0">
-          <Button id="Blue-done" text="Done" />
-        </Panel>
-      </Cell>
-      <Cell>
-        <Panel id="BlueUndoPanel" padding="10 10 0 0">
-          <Button id="Blue-undo" text="Undo"/>
-        </Panel>
-      </Cell>
+      <Cell><Panel id="BlueDonePanel" padding="0 10 0 0"><Button id="Blue-done" text="Done"/></Panel></Cell>
+      <Cell><Panel id="BlueUndoPanel" padding="10 10 0 0"><Button id="Blue-undo" text="Undo"/></Panel></Cell>
       <Cell padding="10 0 0 0">
-        <Panel id="BlueJourneyPanel" padding="10 0 0 0">
-          <Button id="Blue-enableJourney" text="Journey"/>
-        </Panel>
+        <Panel id="BlueJourneyPanel" padding="10 0 0 0"><Button id="Blue-enableJourney" text="Journey"/></Panel>
         <Panel id="BluePlacementPanel" padding="10 0 0 0" active="false">
           <Button id="Blue-placement" text="Place Master" raycastTarget="false"/>
         </Panel>
@@ -134,24 +56,15 @@
     </Row>
   </TableLayout>
 </Panel>
-
-<Panel class="buttonPanel" id="PurplePlayerPanel" position="-142 40 0" >
+<!-- Purple player buttons -->
+<Panel id="PurplePlayerPanel" class="Player" position="-142 40 0">
   <TableLayout columnWidths="80 80 100">
     <Row preferredHeight="40">
       <Cell >
-        <Panel id="PurpleDonePanel" padding="0 10 0 0">
-          <Button id="Purple-done" text="Done" />
-        </Panel>
-      </Cell>
-      <Cell>
-        <Panel id="PurpleUndoPanel" padding="10 10 0 0">
-          <Button id="Purple-undo" text="Undo"/>
-        </Panel>
-      </Cell>
+        <Panel id="PurpleDonePanel" padding="0 10 0 0"><Button id="Purple-done" text="Done"/></Panel></Cell>
+      <Cell><Panel id="PurpleUndoPanel" padding="10 10 0 0"><Button id="Purple-undo" text="Undo"/></Panel></Cell>
       <Cell padding="10 0 0 0">
-        <Panel id="PurpleJourneyPanel" padding="10 0 0 0">
-          <Button id="Purple-enableJourney" text="Journey"/>
-        </Panel>
+        <Panel id="PurpleJourneyPanel" padding="10 0 0 0"><Button id="Purple-enableJourney" text="Journey"/></Panel>
         <Panel id="PurplePlacementPanel" padding="10 0 0 0" active="false">
           <Button id="Purple-placement" text="Place Master" raycastTarget="false"/>
         </Panel>
@@ -159,45 +72,19 @@
     </Row>
   </TableLayout>
 </Panel>
-
-<Panel class="cityPanel" id="cityPanel_1" position="48.5 -69.5 -15" >
-  <Text class="cityText" id="cityText_1" text="0"/>
-</Panel>
-<Panel class="cityPanel" id="cityPanel_2" position="5.2 -71.4 -15" >
-  <Text class="cityText" id="cityText_2" text="0"/>
-</Panel>
-<Panel class="cityPanel" id="cityPanel_3" position="-52.9 -64.5 -15" >
-  <Text class="cityText" id="cityText_3" text="0"/>
-</Panel>
-<Panel class="cityPanel" id="cityPanel_4" position="27 -31.8 -15" >
-  <Text class="cityText" id="cityText_4" text="0"/>
-</Panel>
-<Panel class="cityPanel" id="cityPanel_5" position="-24 -36.5 -15" >
-  <Text class="cityText" id="cityText_5" text="0"/>
-</Panel>
-<Panel class="cityPanel" id="cityPanel_6" position="65.8 -4 -15" >
-  <Text class="cityText" id="cityText_6" text="0"/>
-</Panel>
-<Panel class="cityPanel" id="cityPanel_7" position="-19.2 2 -15" >
-  <Text class="cityText" id="cityText_7" text="0"/>
-</Panel>
-<Panel class="cityPanel" id="cityPanel_8" position="-92 4.5 -15" >
-  <Text class="cityText" id="cityText_8" text="0"/>
-</Panel>
-<Panel class="cityPanel" id="cityPanel_9" position="80.5 50.7 -15" >
-  <Text class="cityText" id="cityText_9" text="0"/>
-</Panel>
-<Panel class="cityPanel" id="cityPanel_10" position="20.6 29.6 -15" >
-  <Text class="cityText" id="cityText_10" text="0"/>
-</Panel>
-<Panel class="cityPanel" id="cityPanel_11" position="-47.3 40.3 -15" >
-  <Text class="cityText" id="cityText_11" text="0"/>
-</Panel>
-<Panel class="cityPanel" id="cityPanel_12" position="36.2 78.5 -15" >
-  <Text class="cityText" id="cityText_12" text="0"/>
-</Panel>
-<Panel class="cityPanel" id="cityPanel_13" position="-24 76.3 -15" >
-  <Text class="cityText" id="cityText_13" text="0"/>
-</Panel>
+<!-- City strength panels -->
+<Panel class="City" id="cityPanel_1" position="48.5 -69.5 -15"><Text class="City" id="cityText_1" text="0"/></Panel>
+<Panel class="City" id="cityPanel_2" position="5.2 -71.4 -15"><Text class="City" id="cityText_2" text="0"/></Panel>
+<Panel class="City" id="cityPanel_3" position="-52.9 -64.5 -15"><Text class="City" id="cityText_3" text="0"/></Panel>
+<Panel class="City" id="cityPanel_4" position="27 -31.8 -15"><Text class="City" id="cityText_4" text="0"/></Panel>
+<Panel class="City" id="cityPanel_5" position="-24 -36.5 -15"><Text class="City" id="cityText_5" text="0"/></Panel>
+<Panel class="City" id="cityPanel_6" position="65.8 -4 -15"><Text class="City" id="cityText_6" text="0"/></Panel>
+<Panel class="City" id="cityPanel_7" position="-19.2 2 -15"><Text class="City" id="cityText_7" text="0"/></Panel>
+<Panel class="City" id="cityPanel_8" position="-92 4.5 -15"><Text class="City" id="cityText_8" text="0"/></Panel>
+<Panel class="City" id="cityPanel_9" position="80.5 50.7 -15"><Text class="City" id="cityText_9" text="0"/></Panel>
+<Panel class="City" id="cityPanel_10" position="20.6 29.6 -15"><Text class="City" id="cityText_10" text="0"/></Panel>
+<Panel class="City" id="cityPanel_11" position="-47.3 40.3 -15"><Text class="City" id="cityText_11" text="0"/></Panel>
+<Panel class="City" id="cityPanel_12" position="36.2 78.5 -15"><Text class="City" id="cityText_12" text="0"/></Panel>
+<Panel class="City" id="cityPanel_13" position="-24 76.3 -15"><Text class="City" id="cityText_13" text="0"/></Panel>
 
 </XmlLayout>

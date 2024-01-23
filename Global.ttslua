@@ -10,6 +10,12 @@
 
 	Mod by David Veach (2023)
 
+	2024:
+		- DONE: 2.0.0 Update XML UI & styles to standards.
+		- TODO: 2.0.0 Code cleanup & improvements.
+		- TODO: 2.0.0 Add a player UI aid pdf
+		- TODO: 2.0.0 test undo
+
 	TODO: Bugfixes, ideas and such
 	-- WARN: Remove UI stored state for destroyed objects (bridges) to prevent replay warnings on game reload.
 	-- OCD: separate table of tile positions from GUIDs, take/replace tiles in top down order (indexed table of positions), build in setup
@@ -17,14 +23,15 @@
 ******************************************************************************** ]]
 
 env = {}
+env.version = "2.0.0 dev branch"
 env.test = {}
-env.test.trace = false
+env.test.trace = true
 env.test.debug = false
 env.test.in_dev = false
-env.test.force_fresh_save = false --disable for normal play, true during development
+env.test.force_fresh_save = false
 env.test.hide_start_panel = false
 -- env.test.test_players = {"Blue","Yellow","Red","Purple"}
--- env.test.test_players = {"Blue","Red","Yellow"}
+env.test.test_players = {"Blue","Red","Yellow"}
 
 
 GD = {}
@@ -33,18 +40,24 @@ GD = {}
 Load function
 ********************************]]
 function onLoad(saved_data)
-	if env.test.trace then log("onLoad()") end
-	if env.test.force_fresh_save then saved_data = "" end
+	log("*************************************")
+  log("Disigner:       Leo Colovini")
+  log("Artist:         Alvin Madden, Anke Pohl, Thilo Rick, Andreas Steiner, Imelda Vohwinkel")
+  log("Year Released:  2003")
+  log("Publisher:      KOSMOS")
+  log("TTS Scripting: David Veach, 2023,2024")
+  log("Version: "..env.version)
+  log("*************************************")
+	UI.setAttribute("game_version", "text", "Version: "..env.version)
+	if env.test.test_players then log("WARN: test harness player simulation enabled")end
+	-- if env.test.force_fresh_save then saved_data = "" end
 	--initialize objects
 	local board = getObjectFromGUID(C.board_guid)
 	if not(env.test.in_dev) then
 		board.interactable = false
-		for g,_ in pairs(C.markers) do
-			getObjectFromGUID(g).interactable = false
-		end
+		for g,_ in pairs(C.markers) do getObjectFromGUID(g).interactable = false end
 		getObjectFromGUID(C.trash_guid).interactable = false
 	end
-
 	if (saved_data ~= "") then
     log("onLoad(): load with saved data")
     local restore_data = JSON.decode(saved_data)
@@ -61,9 +74,7 @@ function onLoad(saved_data)
 			end
 		end
 	end
-	if env.test.hide_start_panel then
-		UI.setAttribute("startPanel","active","false")
-	end
+	if env.test.hide_start_panel then UI.setAttribute("startPanel","active","false") end
 end
 
 --[[ *****************************
@@ -306,9 +317,7 @@ function startGame()
 			UI_setAttribute(pcol.."_impactRow","active",contains(GD.game.player_order, pcol))
 		end
 		UI_setAttribute("statusPanel","height","330")
-		UI_setAttribute("statusInnerPanel","height","310")
 		UI_setAttribute("journeyAckPanel","height","840")
-		UI_setAttribute("journeyAckInnerPanel","height","820")
 		UI_setAttribute("journeyImpactRow","preferredHeight","140")
 		UI_setAttribute("journeyImpactTable","Height","140")
 	end
